@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- CSS for Right-Side Modal -->
+<style>
+    .modal-dialog-end {
+        position: absolute;
+        right: 0;
+        margin: 0;
+        height: 100%;
+        width: 50%;
+
+    }
+
+    .modal-content {
+        border-radius: 0;
+        height: 100%;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        border-radius: 2%;
+
+    }
+
+    .modal.show .modal-content {
+        transform: translateX(0);
+    }
+
+    .modal.fade .modal-dialog {
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .modal.show .modal-dialog {
+        transform: translateX(0);
+    }
+</style>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+<nav class="navbar navbar-expand-lg" style="background-color: #160228; color: #ffffff; margin: 0;">
+    <div class="container-fluid justify-content-center" style="padding: 0;">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
+            style="background-color: #6c757d;">
+            <span class="navbar-toggler-icon" style="color: #ffffff;"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-center" id="navbarSupportedContent">
+            <ul class="navbar-nav mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#" style="color: #ffcc00;">
+                        <i class="fas fa-home"></i> <b>Home</b>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" style="color: #00ccff;">
+                        <i class="fas fa-user"></i> <b>Employees</b>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" style="color: #ff6699;">
+                        <i class="fas fa-calendar-alt"></i> <b>Attendance</b>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Attendance/Holidays/" style="color: #66ff66;">
+                        <i class="fas fa-calendar-alt"></i> <b>Holidays</b>
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false" style="color: #ff9966;">
+                        <i class="fas fa-briefcase"></i> <b>More</b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/Attendance/PreviousMonthAttendence/"><i
+                                    class="fas fa-chart-line"></i> Previous Month </a></li>
+                        <li><a class="dropdown-item" href="/Attendance/SalarySleep/"><i class="fas fa-receipt"></i>
+                                Salary Slip</a></li>
+                        <li><a class="dropdown-item" href="/Notifications/leave/"><i class="fas fa-users"></i>Leave Application</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="/Notifications/"><i class="fas fa-cogs"></i>Notifications</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid mt-5">
+
+
+
+    <div class="row">
+        <!-- Profile Section -->
+        <div class="col-12 col-md-3" style="height: 100vh; overflow-y: auto;">
+
+            <div class="card p-3" style="border: 2px solid #66ff66;  border-radius: 5px; background-color: #66ff6623;">
+
+                <div class="container-fluid text-center ">
+                    {% if employee_data.personal_info.photo %}
+                    <img src="/media/{{ employee_data.personal_info.photo }}" alt="" width="100px"
+                        style="border: 1px solid black; border-radius: 10%;">
+                    {% else %}
+                    <img src="{% static 'img/default.png' %}" alt="" width="100px"
+                        style="border: 1px solid black; border-radius: 10%;">
+                    {% endif %}
+                    <h5 class="card-title">{{ employee_data.personal_info.emp_name }} ({{employee_data.personal_info.emp_id }})</h5>
+                    <p><b>({{ employee_data.job_info.designation }})</b></p>
+                    <table class="table">
+                        <tr>
+                            <td><strong>Latitude</strong></td>
+                            <td class="form-control" id="lat">:</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Longitude</strong></td>
+                            <td class="form-control" id="lon">:</td>
+                        </tr>
+                    </table>
+                    <h6 class=" card-title text-success" style="animation: blinker 0.8s linear infinite;">
+                        <b>{{Time}}</b>
+                    </h6>
+
+                    <style>
+                        @keyframes blinker {
+                            50% {
+                                opacity: 0;
+                            }
+                        }
+                    </style>
+
+                    <form action="/Attendance/MarkAttendence/" method="post" onsubmit="checkGeolocation()">
+                        {% csrf_token %}
+                        <input type="hidden" name="Latitude" id="Latitude" required>
+                        <input type="hidden" name="Longitude" id="Longitude" required>
+                        {% if MSG %}
+                        <Button class="btn-outline-success btn " type="submit">{{MSG}}</Button>
+                        {% else %}
+                        <p class="form-control text-danger"><b>Already Check-Out Contact To Manager</b></p>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+
+            {% if Reporties %}
+       <div class="card p-2" style="border:2px solid #f795b6 ; border-radius: 5px; background-color: #ff66991a;">
+                <h5 class="card-title text-center">Reporties</h5>
+                {% for report in Reporties %}
+                <div class="row align-items-center border p-2">
+                    <div class="col-4 text-center">
+                        <img src="/media/{{report.Personal_Info.photo}}" alt="Profile Image" width="80%"
+                            style="border: 1px solid black; border-radius: 50%;">
+                    </div>
+                    <div class="col-8">
+                        <b>{{report.Personal_Info.emp_name}}({{report.Personal_Info.emp_id}})</b>
+                    </div>
+                </div>
+            {% endfor %} 
+            </div>
+            {% endif %}
+
+
+
+
+
+
+
+            </div>
+
+
+
+
+        <!-- Attendance Report Section -->
+        <div class="col-12 col-md-9" style="height: 100vh; overflow-y: auto;">
+            <div class="content">
+
+                <h5 class="text-center card-title">
+                    My Attendance Report
+                </h5>
+
+
+
+
+
+
+                <div class="container m-2 p-2" style="border:  2px solid #00ccff74; border-radius: 5px; background-color: #00ccff09;">
+                    <form action="/Attendance/" method="get" class="d-flex justify-content-center align-items-center">
+                        <div class="form-group mx-5">
+                            <label for="from_date" class="mr-5">From:</label>
+                                <input type="month" class="form-control" name="from_date" id="from_date" value="{{ start_date|date:'Y-m' }}">
+                        </div>
+                        <div class="form-group mx-5">
+                            <label for="end_date" class="mr-5">To:</label>
+                                    <input type="month" class="form-control" name="end_date" id="end_date" value="{{ end_date|date:'Y-m' }}">
+                        </div>
+                        <button type="submit" class="btn btn-info">
+                            <i class="bi bi-funnel"></i> Filter
+                        </button>
+                    </form>
+                </div>
+
+
+
+
+
+
+
+                <nav class="navbar navbar-expand-lg" style="background-color: white; color: black; margin: 0;">
+                    <div class="container-fluid justify-content-center" style="padding: 0;">
+                        <div class="collapse navbar-collapse justify-content-center" id="navbarSupportedContent">
+                            <ul class="navbar-nav mb-2 mb-lg-0">
+                                <li class="nav-item">
+                                    <a class="nav-link active" aria-current="page" href="#" onclick="setActive(this)">
+                                        <i class="bi bi-grid text-success"></i> <b>Tabular Form</b>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" aria-current="page" href="#" onclick="setActive(this)">
+                                        <i class="bi bi-calendar-day text-danger"></i> <b>Calendar Form</b>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" aria-current="page" href="#" onclick="setActive(this)">
+                                        <i class="bi bi-person-check text-warning"></i> <b>Attendance</b>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#rightSideModal"
+                                        aria-current="page" onclick="setActive(this)">
+                                        <i class="bi bi-bar-chart-line text-info"></i> <b>Reports</b>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+
+                <div class="card p-3" style="border:2px solid #ffcc005f;background-color: #ff996608; border-radius: 5px;">
+                   
+                    </h5>
+                    <table id="datatables" class="text-center table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Date</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
+                                <th>Check In Location</th>
+                                <th>Check Out Location</th>
+                                <th>Hours Worked</th>
+                                <th>Overtime Hours</th>
+                                <th>Status</th>
+                                <th>Remark</th>
+                                <th>Reason for Absence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in Attendance_Report %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ record.date| date:'d/m/Y' }}</td>
+                                <td>{{ record.check_in }}</td>
+                                <td>{{ record.check_out }}</td>
+                                <td>{{ record.check_in_location }}</td>
+                                <td>{{ record.check_out_location }}</td>
+                                <td>{{ record.hours_worked }}</td>
+                                <td>{{ record.overtime_hours }}</td>
+                                <td>{{ record.get_status_display }}</td>
+                                <td>{{ record.remark }}</td>
+                                <td>{{ record.reason_for_absence }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="11" class="text-center">No attendance records found for this month.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<!-- Right-Side Modal Showing Attendence Reports -->
+<div class="modal fade" id="rightSideModal" tabindex="-1" aria-labelledby="rightSideModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-end modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="rightSideModalLabel">{{MonthYear}} :- Attendence Reports</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container mt-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Attendance Summary for {{ MonthYear }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-bordered table-striped">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Attribute</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Days In Month</td>
+                                        <td>{{ data.0.Total_days }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Weekly Off</td>
+                                        <td>{{ data.0.Weekly_Off_days }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Holidays</td>
+                                        <td>{{ data.0.Total_Holidays }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Total Working Days</td>
+                                        <td>{{ data.0.Working_Days }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Full Days</td>
+                                        <td>{{ data.0.Full_days }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Half Days</td>
+                                        <td>{{ data.0.Half_days }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Late Marks (Considered in Full Day)</td>
+                                        <td>{{ data.0.Late_Mark_days }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Present Days</td>
+                                        <td>{{ data.0.Present_days_count }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td><b>Total Payble Days</b></td>
+                                        <td>{{ data.0.Payable_Days }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Basic Salary</b></td>
+                                        <td>{{ data.0.Basic_Salary }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Dearness Allowence</b></td>
+                                        <td>{{ data.0.Dearness_Allowence }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-danger"><b>In Hand</b></td>
+                                        <td class="text-danger"><b>{{ data.0.In_Hand }}</b></td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function updateLocationDisplay(lat, lon) {
+        document.getElementById('lat').textContent = lat.toFixed(6); // Show 6 decimal places
+        document.getElementById('lon').textContent = lon.toFixed(6); // Show 6 decimal places
+        document.getElementById('Latitude').value = lat.toFixed(6); // Show 6 decimal places
+        document.getElementById('Longitude').value = lon.toFixed(6); // Show 6 decimal places
+    }
+
+    function handleError(error) {
+        console.error('Error occurred while fetching location:', error);
+        alert('Unable to retrieve location. Please make sure location services are enabled.');
+    }
+
+    function checkGeolocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    updateLocationDisplay(latitude, longitude);
+                },
+                handleError
+            );
+        } else {
+            alert('Geolocation is not supported by this browser.');
+        }
+    }
+
+    // Check geolocation and update display on page load
+    window.onload = checkGeolocation;
+</script>
+
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container my-5">
+    <div class="card p-4 mx-auto" style="max-width: 1000px;">
+        <h2 class="text-center mb-3"><b>Payslip</b></h2>
+        <h5 class="text-center mb-1"><b>CHANKYA E-SERVICES PRIVATE LIMITED</b></h5>
+        <p class="text-center mb-4">STPI PLOT NO T-25 BLOCK D OPPOSITEESIC HOSPITAL MIDC CHIKALTHANA CHHATRAPATI SANBHAJINAGAR MAHARASHTRA 431007</p>
+
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <td><strong>Employee Name : </strong> </td><td>{{ employee_data.personal_info.emp_name }}</td>
+                    <td><strong>Date of Joining : </strong></td><td> {{ employee_data.job_info.doj|date:" d / m /Y" }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Designation : </strong> </td><td>{{ employee_data.job_info.designation }}</td>
+                    <td><strong>Total Working Days:</strong></td><td> {{ pay_period }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Department:</strong> </td><td>{{ employee_data.Department_info.department_name }}</td>
+                    <td><strong>Number Of Working Days Attended:</strong> </td><td>{{ worked_days }}</td>
+                </tr>
+                <tr>
+                    <td><strong>UAN:</strong>-</td><td></td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td><strong>INSURANCE:</strong></td><td>-</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td><strong>Bank A/C:</strong></td><td>{{ employee_data.financial_info.bank_account_number }}</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td><strong>Bank Name:</strong></td><td>-</td>
+                    <td colspan="2"></td>
+                </tr>
+               
+            </tbody>
+        </table>
+
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-start">Earnings</th>
+                    <th scope="col" class="text-center">Amount</th>
+                    <th scope="col" class="text-start">Deductions</th>
+                    <th scope="col" class="text-center">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Basic</td>
+                    <td class="text-end">{{ basic }}</td>
+                    <td>Provident Fund</td>
+                    <td class="text-center">{{ provident_fund }}</td>
+                </tr>
+                <tr>
+                    <td>Incentive Pay</td>
+                    <td class="text-end">{{ incentive_pay }}</td>
+                    <td>Professional Tax</td>
+                    <td class="text-center">{{ professional_tax }}</td>
+                </tr>
+                <tr>
+                    <td>House Rent Allowance</td>
+                    <td class="text-end">{{ house_rent_allowance }}</td>
+                    <td>Loan</td>
+                    <td class="text-end">{{ loan }}</td>
+                </tr>
+                <tr>
+                    <td>Meal Allowance</td>
+                    <td class="text-center">{{ meal_allowance }}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td><strong>Total Earnings</strong></td>
+                    <td class="text-end fw-bold">{{ total_earnings }}</td>
+                    <td><strong>Total Deductions</strong></td>
+                    <td class="text-end fw-bold">{{ total_deductions }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                    <td><strong>Net Pay</strong></td>
+                    <td class="text-end fw-bold">{{ net_pay }}</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <p class="text-center fs-5 mt-4"><strong>{{ net_pay_words }}</strong></p>
+
+        <div class="text-center mt-5">
+            <div class="row">
+                <div class="col-6 border-top pt-2">Employer Signature</div>
+                <div class="col-6 border-top pt-2">Employee Signature</div>
+            </div>
+        </div>
+
+        <p class="text-center mt-4">This is a system-generated payslip</p>
+    </div>
+</div>
+
+{% endblock %}

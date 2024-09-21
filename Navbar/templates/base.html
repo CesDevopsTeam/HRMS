@@ -1,0 +1,514 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>{% block title %}{% endblock %}</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+    <!-- Favicons -->
+    <link href="assets/img/favicon.png" rel="icon">
+    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+    <!-- Google Fonts -->
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link
+        href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+        rel="stylesheet">
+    <!-- Vendor CSS Files -->
+    <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- data tables -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script type="text/javascript" charset="utf8"
+        src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+
+
+    <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/vendor/boxicons/css/boxicons.min.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/vendor/quill/quill.snow.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/vendor/quill/quill.bubble.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/vendor/remixicon/remixicon.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- ======= Header ======= -->
+    <header id="header" class="header fixed-top d-flex align-items-center">
+
+        <div class="d-flex align-items-center justify-content-between">
+            <a href="#" class="logo d-flex align-items-center">
+                <img src="{% static 'img/logos.png' %}" alt="" >
+                <!-- <span class="d-none d-lg-block">Chankya</span> -->
+            </a>
+            <i class="bi bi-list toggle-sidebar-btn"></i>
+        </div><!-- End Logo -->
+
+        <div class="search-bar">
+            <form class="search-form d-flex align-items-center" method="POST" action="#">
+                <input type="text" name="query" placeholder="Search" title="Enter search keyword">
+                <button type="submit" title="Search"><i class="bi bi-search"></i></button>
+            </form>
+        </div><!-- End Search Bar -->
+
+        <nav class="header-nav ms-auto">
+            <ul class="d-flex align-items-center">
+
+                <li class="nav-item d-block d-lg-none">
+                    <a class="nav-link nav-icon search-bar-toggle " href="#">
+                        <i class="bi bi-search"></i>
+                    </a>
+                </li><!-- End Search Icon-->
+
+
+
+
+
+
+
+
+
+
+                <li class="nav-item dropdown pe-3">
+
+                    <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+                    {% if employee_data.personal_info.photo %}
+                        <img src="/media/{{ employee_data.personal_info.photo }}" alt="Profile" class="rounded-circle">
+                    {% else %}
+                        <img src="{% static 'img/default.png' %}" alt="Profile" class="rounded-circle">
+                    {% endif %}
+                        {% if name %}
+                        <span class="d-none d-md-block dropdown-toggle ps-2">{{employee_name}}</span>
+                        {% endif %}
+                    </a><!-- End Profile Iamge Icon -->
+
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+                        <li class="dropdown-header">
+
+
+                            <h6>{{ employee_data.personal_info.emp_name }} ({{ employee_data.personal_info.emp_id }})</h6>
+                            <span>({{ employee_data.job_info.designation }})</span>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <i class="bi bi-person"></i>
+                                <span>My Profile</span>
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <i class="bi bi-gear"></i>
+                                <span>Account Settings</span>
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <i class="bi bi-question-circle"></i>
+                                <span>Need Help?</span>
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center" href="/logout/">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span>Sign Out</span>
+                            </a>
+                        </li>
+
+                    </ul><!-- End Profile Dropdown Items -->
+                </li><!-- End Profile Nav -->
+
+            </ul>
+        </nav><!-- End Icons Navigation -->
+
+    </header><!-- End Header -->
+
+
+
+
+
+    
+
+    <!-- ======= Sidebar ======= -->
+    <aside id="sidebar" class="sidebar">
+        <ul class="sidebar-nav" id="sidebar-nav">
+
+            <li class="my-5">
+                <a href="/Attendance/">
+                    <i class="bi bi-calendar-check icon-lg" title="Attendance"></i>
+                </a>
+            </li>
+            <li class="my-5">
+                <a href="/payroll/">
+                    <i class="bi bi-cash icon-lg" title="Payroll"></i>
+                </a>
+            </li>
+            
+            <li class="my-5" onclick="show()">
+                <i class="bi bi-gear icon-lg" title="More Options"></i>
+            </li>
+
+        </ul>
+    </aside>
+
+
+    
+    <aside id="sidebar" class="MoreOption" style="display: none;">
+
+        <ul class="sidebar-nav" id="sidebar-nav">
+
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-grid"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/Attendance/Employee/">
+                    <i class="bi bi-person"></i>
+                    <span>Employee</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-building"></i>
+                    <span>Branch</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-calendar"></i>
+                    <span>Attendance</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/Attendance/Report/">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Reports</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-cash"></i>
+                    <span>Payroll</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Leave</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-card-checklist"></i>
+                    <span>Management</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>KPI</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-briefcase"></i>
+                    <span>Recruitment</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-bell"></i>
+                    <span>Announcements</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-file-text"></i>
+                    <span>Policies</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-people"></i>
+                    <span>Chart</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-award"></i>
+                    <span>Awards</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/AdvanceOptions/">
+                    <i class="bi bi-sliders"></i>
+                    <span>Advance Options</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-gear"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+    <script>
+        function show() {
+            var elements = document.getElementsByClassName("MoreOption");
+        for (var i = 0; i < elements.length; i++) {
+            if (elements[i].style.display === "none" || elements[i].style.display === "") {
+                elements[i].style.display = "block";
+            } else {
+                elements[i].style.display = "none";
+            }
+        }
+        }
+    </script>
+    <main id="main" class="main">
+        {% block content %}
+        {% endblock %}
+    </main>
+    <!-- ======= Footer ======= -->
+    <footer id="footer" class="footer">
+        <div class="copyright">
+            &copy; Copyright <strong><span>HRMS</span></strong>. All Rights Reserved
+        </div>
+        <div class="credits">
+            Designed by <a href="https://cesindia.org/">CESINDIA</a>
+        </div>
+    </footer><!-- End Footer -->
+
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+            class="bi bi-arrow-up-short"></i></a>
+
+    <!-- Vendor JS Files -->
+    <script src="{% static 'assets/vendor/apexcharts/apexcharts.min.js' %}"></script>
+    <script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/vendor/chart.js/chart.umd.js' %}"></script>
+    <script src="{% static 'assets/vendor/echarts/echarts.min.js' %}"></script>
+    <script src="{% static 'assets/vendor/quill/quill.min.js' %}"></script>
+    <script src="{% static 'assets/vendor/apexcharts/apexcharts.min.js' %}"></script>
+    <script src="{% static 'assets/vendor/php-email-form/validate.js' %}"></script>
+    <script src="{% static 'assets/js/main.js' %}"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+        .modalmessage {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            top: 20px;  /* Positioned at the top of the page */
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 480px;  /* Max-width for a cleaner look */
+            border-radius: 12px;  /* Rounded corners for a modern feel */
+            opacity: 0;  /* Hidden by default */
+            transition: opacity 0.5s ease, transform 0.5s ease;  /* Smooth fade-in/out */
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);  /* Floating effect */
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .modalmessage-content {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            position: relative;
+        }
+        
+        .modalmessage.success {
+            background-color: white;
+            color: black;
+            border: 2px solid #218838;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 
+                        0 6px 20px rgba(0, 0, 0, 0.19);
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        
+        .modalmessage.error {
+            background-color: white; 
+            color: black;
+            border: 2px solid #c82333;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 
+                        0 6px 20px rgba(0, 0, 0, 0.19);
+            transition: box-shadow 0.3s ease-in-out;
+
+        }
+        
+        
+        .modal-icon {
+            width: 40px;  /* Standard icon size */
+            height: 40px;
+            margin-right: 15px;  /* Space between icon and text */
+        }
+        
+        
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .modalmessage {
+                width: 95%;
+            }
+        }
+        
+        </style>
+
+<!-- Error/Success Modal -->
+<div id="errorModal" class="modalmessage">
+    <div class="modalmessage-content">
+        <img id="modalIcon" src="" alt="status icon" class="modal-icon">
+        <div class="container text-center">
+            
+            <p id="errorText"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    var modal = document.getElementById("errorModal");
+
+    function closeErrorModal() {
+        modal.style.opacity = "0";  // For a fade-out effect
+        setTimeout(function () {
+            modal.style.display = "none";
+        }, 500);  // Adjust this time to match the CSS transition time
+    }
+
+    function showError(message, type) {
+        var errorText = document.getElementById("errorText");
+        var modalIcon = document.getElementById("modalIcon");
+        errorText.innerHTML = message;
+
+        if (type === 'success') {
+            modal.className = "modalmessage success";
+            modalIcon.src = "{% static 'img/correct.png' %}";  // Django static file usage
+        } else if (type === 'error') {
+            modal.className = "modalmessage error";
+            modalIcon.src = "{% static 'img/wrong.png' %}";  // Django static file usage
+        }
+
+        modal.style.display = "block";
+        setTimeout(function () {
+            modal.style.opacity = "1";  // For a fade-in effect
+        }, 10);
+        setTimeout(closeErrorModal, 3000);  // Adjust the time for how long the modal should be visible
+    }
+</script>
+
+{% if messages %}
+    {% for message in messages %}
+        <script>
+            showError("{{ message }}", "{{ message.tags }}");
+        </script>
+    {% endfor %}
+{% endif %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+<script>
+    $(document).ready(function () {
+        $('#datatables').DataTable();
+    });
+
+
+    $(document).ready(function () {
+        $('#datatables1').DataTable();
+    });
+    $(document).ready(function () {
+        $('#datatables2').DataTable();
+    });
+    $(document).ready(function () {
+        $('#datatables3').DataTable();
+    });
+    $(document).ready(function () {
+        $('#datatables4').DataTable();
+    });
+    $(document).ready(function () {
+        $('#datatables5').DataTable();
+    });
+    $(document).ready(function () {
+        $('#datatables6').DataTable();
+    });
+    $(document).ready(function () {
+        $('#datatables7').DataTable();
+    });
+</script>
+
+</html>

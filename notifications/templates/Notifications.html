@@ -1,0 +1,317 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<style>
+    .modal-content {
+        border-radius: 0.5rem;
+        width: 40vw;
+    }
+
+    .btn-floating {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 1050; /* Ensure it's above other content */
+    }
+
+    .modal-dialog {
+        position: absolute;
+        bottom: 0rem; /* Adjust this value to fit below the button */
+        right: 0rem; /* Align with the button */
+        margin: 0;
+    }
+</style>
+<div class="card-body">
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="all-notifications-tab" data-bs-toggle="tab" href="#All_Notifications" role="tab" aria-controls="All_Notifications" aria-selected="true">Inbox</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="personal-tab" data-bs-toggle="tab" href="#personal" role="tab" aria-controls="personal" aria-selected="false">Success</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="team-tab" data-bs-toggle="tab" href="#team" role="tab" aria-controls="team" aria-selected="false">Info</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="all-leaves-tab" data-bs-toggle="tab" href="#all-leaves" role="tab" aria-controls="all-leaves" aria-selected="false">Warning</a>
+        </li>
+        <!-- New Tabs -->
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="pending-requests-tab" data-bs-toggle="tab" href="#pending-requests" role="tab" aria-controls="pending-requests" aria-selected="false">Error</a>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="myTabContent">
+        <!-- Inbox Tab -->
+        <div class="tab-pane fade show active" id="All_Notifications" role="tabpanel" aria-labelledby="all-notifications-tab">
+            <table id="datatables" class="table ">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for notify in Notification_Model %}
+                    <tr onclick="mark_read({{ notify.pk }}, '{{ notify.redirect }}');" style="cursor: pointer;">
+                        <td>
+                                <input type="checkbox" name="" id="">
+                            </td>
+                            <td>
+                                {% if notify.is_read %}
+                                {{ notify.sender.emp_name }}
+                                {% else %}
+                                <b>{{ notify.sender.emp_name }}</b>
+                                {% endif %}
+                                
+                                ({{ notify.sender.emp_id }})</td>
+                            <td>
+                                {% if notify.is_read %}
+                                {{ notify.message }}
+                                {% else %}
+                                <b>{{ notify.message }}</b>
+                                {% endif %}</td>
+                            <td>{{ notify.notification_type  }}</td>
+                            <td>{{ notify.created_at  }}</td>
+                        </tr>
+                        {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Personal Leaves Tab -->
+        <div class="tab-pane fade" id="personal" role="tabpanel" aria-labelledby="personal-tab">
+            <table id="datatables1" class="table ">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for notify in Notification_Success %}
+                    <tr onclick="mark_read({{ notify.pk }}, '{{ notify.redirect }}');" style="cursor: pointer;">
+                        <td>
+                                <input type="checkbox" name="" id="">
+                            </td>
+                            <td>
+                                {% if notify.is_read %}
+                                {{ notify.sender.emp_name }}
+                                {% else %}
+                                <b>{{ notify.sender.emp_name }}</b>
+                                {% endif %}
+                                
+                                ({{ notify.sender.emp_id }})</td>
+                            <td>
+                                {% if notify.is_read %}
+                                {{ notify.message }}
+                                {% else %}
+                                <b>{{ notify.message }}</b>
+                                {% endif %}</td>
+                            <td>{{ notify.created_at  }}</td>
+                        </tr>
+                        {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- My Team Leaves Tab -->
+        <div class="tab-pane fade" id="team" role="tabpanel" aria-labelledby="team-tab">
+            <table id="datatables2" class="table ">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for notify in Notification_Info %}
+                    <tr onclick="mark_read({{ notify.pk }}, '{{ notify.redirect }}');" style="cursor: pointer;">
+                        <td>
+                                <input type="checkbox" name="" id="">
+                            </td>
+                            <td>
+                                {% if notify.is_read %}
+                                {{ notify.sender.emp_name }}
+                                {% else %}
+                                <b>{{ notify.sender.emp_name }}</b>
+                                {% endif %}
+                                
+                                ({{ notify.sender.emp_id }})</td>
+                            <td>
+                                {% if notify.is_read %}
+                                {{ notify.message }}
+                                {% else %}
+                                <b>{{ notify.message }}</b>
+                                {% endif %}</td>
+                            <td>{{ notify.created_at  }}</td>
+                        </tr>
+                        {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- All Leaves Tab -->
+        <div class="tab-pane fade" id="all-leaves" role="tabpanel" aria-labelledby="all-leaves-tab">
+            <table id="datatables4" class="table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for notify in Notification_Warning %}
+                    <tr onclick="mark_read({{ notify.pk }}, '{{ notify.redirect }}');" style="cursor: pointer;">
+                        <td>
+                                <input type="checkbox" name="" id="">
+                            </td>
+                            <td>
+                                {% if notify.is_read %}
+                                {{ notify.sender.emp_name }}
+                                {% else %}
+                                <b>{{ notify.sender.emp_name }}</b>
+                                {% endif %}
+                                
+                                ({{ notify.sender.emp_id }})</td>
+                            <td>
+                                {% if notify.is_read %}
+                                {{ notify.message }}
+                                {% else %}
+                                <b>{{ notify.message }}</b>
+                                {% endif %}</td>
+                            <td>{{ notify.created_at  }}</td>
+                        </tr>
+                        {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Pending Requests Tab -->
+        <div class="tab-pane fade" id="pending-requests" role="tabpanel" aria-labelledby="pending-requests-tab">
+            <table id="datatables5" class="table ">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for notify in Notification_Error %}
+                    <tr onclick="mark_read({{ notify.pk }}, '{{ notify.redirect }}');" style="cursor: pointer;">
+                        <td>
+                                <input type="checkbox" name="" id="">
+                            </td>
+                            <td>
+                                {% if notify.is_read %}
+                                {{ notify.sender.emp_name }}
+                                {% else %}
+                                <b>{{ notify.sender.emp_name }}</b>
+                                {% endif %}
+                                
+                                ({{ notify.sender.emp_id }})</td>
+                            <td>
+                                {% if notify.is_read %}
+                                {{ notify.message }}
+                                {% else %}
+                                <b>{{ notify.message }}</b>
+                                {% endif %}</td>
+                            <td>{{ notify.created_at  }}</td>
+                        </tr>
+                        {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<button type="button" class="btn btn-primary btn-floating" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    <i class="bi bi-plus"></i> <!-- You can use any icon library -->
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">New Notification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-2">
+                <div class="container-fluid p-0 m-0">
+                    <form method="post" action="{% url 'send_notification' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="recipients" class="form-label">To</label>
+                            <select name="recipients" id="recipients" class="form-control" required>
+                                <option value="">Select</option>
+                                {% for user in users %}
+                                    <option value="{{ user.id }}">{{ user.emp_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea name="message" id="message" class="form-control" rows="4"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notification_type" class="form-label">Notification Type</label>
+                            <select name="notification_type" id="notification_type" class="form-select">
+                                <option value="info">Information</option>
+                                <option value="warning">Warning</option>
+                                <option value="success">Success</option>
+                                <option value="error">Error</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                </div>
+                
+            </div>
+           
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    function mark_read(pk, redirect_url) {
+        console.log("ok")
+        console.log(pk)
+        // Send an AJAX request to mark the notification as read
+        fetch(`/Notifications/mark-read/${pk}/`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log("Notification marked as read");
+            } else {
+                console.error(data.error);
+            }
+        })
+        .catch(error => {
+            console.error("Error marking notification as read:", error);
+        });
+        window.location.href = redirect_url;
+
+    }
+</script>
+
+
+{% endblock %}
