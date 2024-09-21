@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+
+<style>
+    .date-filter-form {
+        display: flex;
+        align-items: center;
+    }
+    .date-filter-form .form-label {
+        margin-right: 10px;
+    }
+    .date-filter-form .form-control {
+        margin-right: 10px;
+    }
+    .date-filter-form .btn {
+        margin-left: 5px;
+    }
+</style>
+<div>
+    {% include 'navbar.html' %}
+</div>
+<div class="col-lg-12">
+    <div class="section-container">
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title text-center">Tasks Ratings for {{ username }}</h5>
+                <h6 class="text-center">Total Average Rating: {{ average_rating|floatformat:1 }}</h6>
+                
+                <table id="tasksTable" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Task Title</th>
+                            <th>Task Description</th>
+                            <th>Assigned At</th>
+                            <th>Ratings</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                            <tr>
+                                <td>{{ task.task_title }}</td>
+                                <td>{{ task.task_description }}</td>
+                                <td>{{ task.assigned_at|date:"Y-m-d" }}</td>
+                                <td>
+                                    {% if task.ratings_list.count > 0 %}
+                                        <div class="rating-stars">
+                                            {% for rating in task.ratings_list %}
+                                                {% for i in "12345"|make_list %}
+                                                    <span class="star" style="cursor: default;">
+                                                        {% if i|add:0 <= rating.score %}
+                                                            <i class="fas fa-star" style="color: gold;"></i>
+                                                        {% else %}
+                                                            <i class="far fa-star" style="color: lightgoldenrodyellow;"></i>
+                                                        {% endif %}
+                                                    </span>
+                                                {% endfor %}
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        No ratings yet.
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No completed tasks found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#tasksTable').DataTable();
+    });
+</script>
+
+{% endblock %}

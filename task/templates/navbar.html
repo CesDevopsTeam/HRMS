@@ -1,0 +1,107 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+  body {
+    background-image: url('/static/img/task_page.avif'); /* Replace with your actual image path */
+    background-size: cover; /* Cover the entire background */
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat; /* Prevent repeating the image */
+}
+  .second-navbar {
+      background-color: #000; /* Light background for navbar */
+      padding: 10px; /* Padding around navbar */
+  }
+  
+  .second-navbar .navbar-container {
+      display: flex;
+      align-items: center; /* Align items vertically center */
+      margin-left: 380px;
+  }
+  
+  .second-navbar .nav-link {
+      margin-right: 20px; /* Space between nav items */
+      text-decoration: none; /* Remove underline from links */
+      color: #333; /* Color for nav links */
+  }
+  
+  .second-navbar .btn2 {
+      position: relative;
+      display: inline-block;
+      padding: 8px 15px; /* Reduced padding for smaller size */
+      border: 2px solid #fefefe;
+      text-transform: uppercase;
+      color: #fefefe;
+      text-decoration: none;
+      font-weight: 500; /* Slightly reduced font weight */
+      font-size: 16px; /* Smaller font size */
+      transition: 0.3s;
+  }
+  
+  .second-navbar .btn2::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      width: calc(100% + 4px);
+      height: calc(100% + 4px); /* Adjusted height for consistency */
+      background-color: #212121;
+      transition: 0.3s ease-out;
+      transform: scaleY(1);
+  }
+  
+  .second-navbar .btn2::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      width: calc(100% + 4px);
+      height: calc(100% - 50px);
+      background-color: #212121;
+      transition: 0.3s ease-out;
+      transform: scaleY(1);
+  }
+  
+  .second-navbar .btn2:hover::before {
+      transform: translateY(-25px);
+      height: 0;
+  }
+  
+  .second-navbar .btn2:hover::after {
+      transform: scaleX(0);
+      transition-delay: 0.15s;
+  }
+  
+  .second-navbar .btn2:hover {
+      border: 2px solid #fefefe;
+  }
+  
+  .second-navbar .btn2 span {
+      position: relative;
+      z-index: 3;
+  }
+  
+  .second-navbar button {
+      text-decoration: none;
+      border: none;
+      background-color: transparent;
+  }
+</style>
+<div>
+  <nav class="second-navbar">
+      <div class="navbar-container">
+          <a href="{% url 'daily_task' %}" class="btn2"><span class="spn2">Daily Task</span></a>
+          <a href="{% url 'task' %}" class="btn2"><span class="spn2">Create Task</span></a>
+          <a href="{% url 'overdue_tasks' %}" class="btn2"><span class="spn2">Overdue Tasks</span></a>
+          <a href="{% url 'assigned_tasks' %}" class="btn2"><span class="spn2">Assigned Task</span></a>
+          <a href="{% url 'tasks_with_ratings' %}" class="btn2"><span class="spn2">Tasks with Ratings</span></a>
+          
+          <span class="average-rating" style="margin-left: 150px;">
+              
+              {% for i in "12345"|make_list %}
+                  <i class="{% if i|add:0 <= average_rating %}fas fa-star{% else %}far fa-star{% endif %}" style="color: gold;"></i>
+              {% endfor %}
+          </span>
+      </div>
+  </nav>
+</div>
+

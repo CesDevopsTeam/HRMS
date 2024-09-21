@@ -1,0 +1,388 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+<style>
+    body {
+        color: #fff;
+        font-family: 'Arial', sans-serif;
+    }
+
+    .container {
+        margin-top: 50px;
+    }
+
+    .card {
+        border-radius: 15px;
+        border: none;
+        color: #333;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        background: #333;
+        color: #fff;
+        border: 1px solid #444;
+    }
+
+    .card-header {
+        color: rgb(0, 0, 0);
+        font-size: 1.5rem;
+        border-bottom: 2px solid #0056b3;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 10px;
+        color: #fff;
+        border: 1px solid #444;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        box-shadow: none;
+        border-color: #007bff;
+    }
+
+    .btn-submit {
+        background-color: #28a745;
+        color: white;
+        border-radius: 10px;
+        border: none;
+    }
+
+    .btn-submit:hover {
+        background-color: #218838;
+    }
+
+    .table thead {
+        background: #007bff;
+        color: white;
+    }
+
+    .table tbody tr:nth-child(even) {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .modal-content {
+        border-radius: 15px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+    }
+
+    .modal-header {
+        border-bottom: none;
+    }
+
+    .modal-footer {
+        border-top: none;
+    }
+</style>
+
+<div class="container-fluid">
+    <!-- Apply Leave Button -->
+    <div class="d-flex justify-content-end mb-4">
+        <button type="button" class="btn btn-submit" data-bs-toggle="modal" data-bs-target="#applyLeaveModal">
+            <i class="fas fa-plus"></i> Apply for Leave
+        </button>
+    </div>
+
+    <!-- Leave Applications Table -->
+    <div class="card">
+        <div class="card-header">
+            <h4>Leave Applications</h4>
+        </div>
+        <div class="card-body">
+            <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="personal-tab" data-bs-toggle="tab" href="#personal" role="tab"
+                        aria-controls="personal" aria-selected="true">Personal Leaves</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="team-tab" data-bs-toggle="tab" href="#team" role="tab" aria-controls="team"
+                        aria-selected="false">My Team Leaves</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="myTabContent">
+                <!-- Personal Leaves -->
+                <div class="tab-pane fade show active" id="personal" role="tabpanel" aria-labelledby="personal-tab"
+                    style="width: 100%; overflow-x: scroll;">
+                    <table id="datatables" class="text-center table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Leave Type</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Duration</th>
+                                <th>Subject</th>
+                                <th>Reason</th>
+                                <th>Leave Applied On</th>
+                                <th>Is Approved</th>
+                                <th>Approved / Rejected By</th>
+                                <th>Approved / Rejected On</th>
+                                <th>Remark</th>
+                                <th>Supporting Document</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for leave in my_leaves %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ leave.leave_type }}</td>
+                                <td>{{ leave.start_date }}</td>
+                                <td>{{ leave.end_date }}</td>
+                                <td>{{ leave.get_leave_duration_display }}</td>
+                                <td>{{ leave.subject }}</td>
+                                <td>{{ leave.reason }}</td>
+                                <td>{{ leave.leave_applied_on }}</td>
+                                <td>
+                                    {% if leave.approved_on %}
+                                    {% if leave.is_approved %}
+                                    <p class="text-success">
+                                        Approved
+                                    </p>
+                                    {% else %}
+                                    <p class="text-danger">
+                                        Rejected
+                                    </p>
+                                    {% endif %}
+
+                                    {% else %}<p class="text-warning"><b>waighting </b></p>{% endif %}
+                                </td>
+                                <td>
+                                    {% if leave.approved_by %}{{ leave.approved_by }}{% else %}-{% endif %}
+
+                                </td>
+
+
+
+                                <td>{% if leave.approved_on %}{{ leave.approved_on }}{% else %}-{% endif %}</td>
+                                <td>{% if leave.remark %}{{ leave.remark }}{% else %}-{% endif %}</td>
+
+                                <td>
+                                    {% if leave.supporting_document %}
+                                    <a href="{{ leave.supporting_document }}" target="_blank">View Document</a>
+                                    {% else %}
+                                    N/A
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                            <!-- Add more rows as needed -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- My Team Leaves -->
+                <div class="tab-pane fade" id="team" role="tabpanel" aria-labelledby="team-tab" style="width: 100%; overflow-x: scroll;">
+                    <table id="datatables1" class="text-center table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>ID</th>
+                                <th>Leave Type</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Duration</th>
+                                <th>Subject</th>
+                                <th>Reason</th>
+                                <th>Leave Applied On</th>
+                                <th>Is Approved</th>
+                                <th>Approved / Rejected By</th>
+                                <th>Approved / Rejected On</th>
+                                <th>Remark</th>
+                                <th>Supporting Document</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for leave in My_Team_Leaves %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <a href="#" data-bs-toggle="modal" data-bs-target="#ApproveModal{{leave.pk}}">
+                                    {{ leave.employee.emp_name }}
+                                    </a></td>
+                                <td>{{ leave.employee.emp_id }}</td>
+                                <td>{{ leave.leave_type }}</td>
+                                <td>{{ leave.start_date }}</td>
+                                <td>{{ leave.end_date }}</td>
+                                <td>{{ leave.get_leave_duration_display }}</td>
+                                <td>{{ leave.subject }}</td>
+                                <td>{{ leave.reason }}</td>
+                                <td>{{ leave.leave_applied_on }}</td>
+                                <td>
+                                    {% if leave.approved_on %}
+                                    {% if leave.is_approved %}
+                                    <p class="text-success">
+                                        Approved
+                                    </p>
+                                    {% else %}
+                                    <p class="text-danger">
+                                        Rejected
+                                    </p>
+                                    {% endif %}
+                                    {% else %}<p class="text-warning"><b>waighting </b></p>{% endif %}
+                                </td>
+                                <td>
+                                    {% if leave.approved_by %}{{ leave.approved_by }}{% else %}-{% endif %}
+
+                                </td>
+
+
+
+                                <td>{% if leave.approved_on %}{{ leave.approved_on }}{% else %}-{% endif %}</td>
+                                <td>{% if leave.remark %}{{ leave.remark }}{% else %}-{% endif %}</td>
+
+                                <td>
+                                    {% if leave.supporting_document %}
+                                    <a href="{{ leave.supporting_document }}" target="_blank">View Document</a>
+                                    {% else %}
+                                    N/A
+                                    {% endif %}
+                                </td>
+                                <td>
+                                <div class="d-flex justify-content-end mb-4">
+                                    <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#ApproveModal{{leave.pk}}">
+                                        <i class="fas fa-eye"></i>                                    
+                                    </button>
+                                </div>
+                            </td>
+                            </tr>
+                            <!-- Leave Approve Modal -->
+                            <div class="modal fade container-fluid" id="ApproveModal{{leave.pk}}" tabindex="-1" aria-labelledby="ApproveModal{{leave.pk}}Label"
+                            aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="ApproveModal{{leave.pk}}Label">Approval for Leave <span class="text-warning"><b></b></span></h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form enctype="multipart/form-data" method="post" action="/Notifications/leave_Approve/">
+                                            {% csrf_token %}
+                                            <input name="pk" value="{{leave.pk}}" type="hidden">
+                                            <select name="status" id="" class="form-control" required>
+                                                <option value="">Select</option>
+                                                <option value="A">Approve</option>
+                                                <option value="R">Reject</option>
+                                                </select>                                            
+    
+                                            <div class="mb-3">
+                                                <label for="remark" class="form-label">Remark:</label>
+                                                <textarea class="form-control" id="remark" name="remark" rows="3">{% if leave.remark %}
+                                                  {{leave.remark}}
+                                                {% endif %}</textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                            </div>
+                                            <button type="submit" class="btn btn-submit">Submit</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                            {% endfor %}
+
+
+                            <!-- Add more rows as needed -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leave Application Modal -->
+<div class="modal fade container-fluid" id="applyLeaveModal" tabindex="-1" aria-labelledby="applyLeaveModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="applyLeaveModalLabel">Apply for Leave <span class="text-warning"><b>(Be
+                            Carefull You Can't Edit It)</b></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form enctype="multipart/form-data" method="post" action="/Notifications/leave/">
+                    {% csrf_token %}
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="leaveType" class="form-label">Leave Type</label>
+                            <select id="leaveType" class="form-select" name="leaveType">
+                                <option value="">Select</option>
+                                <option value="personal">Personal Leave</option>
+                                <option value="sick">Sick Leave</option>
+                                <option value="vacation">Vacation</option>
+                                <option value="casual">Casual Leave</option>
+                                <option value="maternity">Maternity Leave</option>
+                                <option value="paternity">Paternity Leave</option>
+                                <option value="bereavement">Bereavement Leave</option>
+                                <option value="public_holiday">Public Holiday Leave</option>
+                                <option value="unpaid">Unpaid Leave</option>
+                                <option value="medical">Medical Leave</option>
+                                <option value="family">Family Leave</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="leaveDuration" class="form-label">Leave Duration</label>
+                            <select id="leaveDuration" class="form-select" name="leaveDuration">
+                                <option value="">Select</option>
+                                <option value="half_day">Half Day</option>
+                                <option value="full_day">Full Day</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="startDate" class="form-label">Start Date</label>
+                            <input type="date" name="startDate" id="startDate" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="endDate" class="form-label">End Date</label>
+                            <input type="date" name="endDate" id="endDate" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="subject" class="form-label">Subject</label>
+                            <input type="text" name="subject" id="subject" class="form-control" placeholder="Subject">
+                        </div>
+
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="reason" class="form-label">Reason</label>
+                            <textarea id="reason" name="reason" class="form-control" rows="4"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="supportingDocument" class="form-label">Supporting Document</label>
+                        <input type="file" id="supportingDocument" name="supportingDocument" class="form-control">
+                    </div>
+
+
+                    <button type="submit" class="btn btn-submit">Submit</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}

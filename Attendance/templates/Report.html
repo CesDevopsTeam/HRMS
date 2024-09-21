@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+
+<!-- Modal Structure -->
+<div class="modal fade" id="attendanceRulesModal" tabindex="-1" aria-labelledby="attendanceRulesModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="attendanceRulesModalLabel">Employee Attendance Rules</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Attendance Status Rules -->
+                <h4>Attendance Status Rules:</h4>
+                <ul>
+                    <li><strong>Present (P):</strong>
+                        <ul>
+                            <li>An employee is marked as <strong>Present</strong> if they have both a check-in and
+                                check-out time, and the total hours worked for the day is <strong>8 hours or
+                                    more</strong>.</li>
+                            <li>If an employee has worked <strong>7.5 to 8 hours</strong>, they are also marked as
+                                <strong>Present</strong>, but flagged as "Late."</li>
+                        </ul>
+                    </li>
+                    <li><strong>Late (L):</strong>
+                        <ul>
+                            <li>An employee is marked as <strong>Late</strong> if they work slightly less than 8 hours,
+                                i.e., between <strong>7.5 and 8 hours</strong>.</li>
+                            <li>In this case, the status is "Present" but with a <strong>Late Mark</strong>.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Half Day (H):</strong>
+                        <ul>
+                            <li>An employee is marked as <strong>Half Day</strong> if they have worked <strong>more than
+                                    4 hours but less than or equal to 7.5 hours</strong>.</li>
+                            <li>This status does not accrue overtime.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Absent (A):</strong>
+                        <ul>
+                            <li>An employee is marked as <strong>Absent</strong> if they work for <strong>less than 4
+                                    hours</strong> in a day.</li>
+                            <li>If no check-in or check-out time is recorded, the employee is marked as
+                                <strong>Absent</strong>.</li>
+                            <li>If the employee doesn't show up or their attendance record is missing, the status
+                                defaults to <strong>Absent</strong>.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- Overtime Calculation -->
+                <h4>Overtime Calculation:</h4>
+                <ul>
+                    <li><strong>Overtime</strong> is calculated for employees who work more than <strong>8
+                            hours</strong>. The hours exceeding 8 are counted as overtime.</li>
+                    <li>If an employee works <strong>less than 8 hours</strong>, no overtime is recorded.</li>
+                </ul>
+
+                <!-- Holidays and Weekly Offs -->
+                <h4>Holidays and Weekly Offs:</h4>
+                <ul>
+                    <li><strong>Full Day Holidays (FD):</strong>
+                        <ul>
+                            <li>If a holiday is marked as <strong>Full Day (FD)</strong>, it is treated as a
+                                <strong>working day</strong> for the employee, and the employee is counted as
+                                <strong>Present</strong> for the day.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Half Day Holidays (HD):</strong>
+                        <ul>
+                            <li>If a holiday is marked as a <strong>Half Day (HD)</strong>, the employee is considered
+                                as <strong>Present</strong> for the full day if they are marked as present, and it does
+                                not affect their working days negatively.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Sundays</strong> and other <strong>weekly offs</strong> are calculated and excluded from
+                        working days.
+                        <ul>
+                            <li>If an employee works through a weekly off or holiday, it will contribute to their
+                                payable days.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <!-- Leave Calculation -->
+                <h4>Leave Calculation:</h4>
+                <ul>
+                    <li><strong>Leave</strong> is incremented if the employee is marked as <strong>Absent (A)</strong>
+                        for the day or if there is no attendance record for the day.</li>
+                    <li>If the employee exceeds the allowed number of leave days, the leave will deduct from the
+                        <strong>payable days</strong>.</li>
+                </ul>
+
+                <!-- Payable Days -->
+                <h4>Payable Days:</h4>
+                <ul>
+                    <li><strong>Payable Days</strong> are calculated as the total number of days the employee has
+                        worked, plus applicable holidays and weekly offs.</li>
+                    <li>If an employee has more than <strong>2 payable days</strong> in the month, they will also
+                        receive weekly offs as part of their payable days.</li>
+                    <li>If their payable days are less than <strong>2</strong>, <strong>Holidays</strong> are deducted
+                        from the total.</li>
+                </ul>
+
+                <!-- Working Days Calculation -->
+                <h4>Working Days Calculation:</h4>
+                <ul>
+                    <li><strong>Total Working Days</strong> = Total days in the month - (Total Holidays + Weekly Off
+                        Days).</li>
+                </ul>
+
+                <p class="mt-3">
+                    This system ensures comprehensive attendance tracking, including special considerations for
+                    holidays, overtime, late marks, and absenteeism. The business logic adheres to predefined attendance
+                    statuses and adjusts the number of payable days accordingly.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<div class="container-fluid card p-3 card">
+    <div class="row">
+        <div class="col-3"></div>
+        <div class="col-6">
+            <h2 class="text-center mb-4 card-title">Employee Salary Reports</h2>
+        </div>
+        <div class="col-3">
+            <a type="button" class="text-danger" data-bs-toggle="modal" data-bs-target="#attendanceRulesModal">
+                <b><u>View Attendance Rules</u></b>
+            </a>
+        </div>
+    </div>
+
+
+
+    <div class="table-responsive">
+
+        <table id="datatables" class="table table-striped table-responsive">
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Employee Name</th>
+                    <th>Total Days</th>
+                    <th>Weekly Off Days</th>
+                    <th>Company Holidays</th>
+                    <th>Working Days</th>
+
+                    <th>Full Days Present</th>
+                    <th>Half Days Present</th>
+                    <th class="text-danger" title=" (Consider In Full Day just Ignore It)">Late Mark Days</th>
+                    <th>Leave Days</th>
+                    <th>Total Present Days</th>
+                    <th title="(Paid Leave + Holidays + Weekly Off)">Total Payable Days</th>
+                    <th>Basic Salary</th>
+                    <th>Dearness Allowence</th>
+                    <th>In Hand</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in data %}
+                <tr>
+                    <td>{{ record.employee_details.personal_info.emp_id }}</td>
+                    <td>{{ record.employee_details.personal_info.emp_name }}</td>
+                    <td>{{ record.Total_days }}</td>
+                    <td>{{ record.Weekly_Off_days }}</td>
+                    <td>{{ record.Total_Holidays }}</td>
+                    <td>{{ record.Working_Days }}</td>
+                    <td>{{ record.Full_days }}</td>
+                    <td>{{ record.Half_days }}</td>
+                    <td>{{ record.Late_Mark_days }}</td>
+                    <td>{{ record.leave }}</td>
+                    <td>{{ record.Present_days_count }}</td>
+                    <td>{{ record.Payable_Days }}</td>
+                    <td>{{ record.Basic_Salary }}</td>
+                    <td>{{ record.Dearness_Allowence }}</td>
+                    <td>{{ record.In_Hand }}</td>
+
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

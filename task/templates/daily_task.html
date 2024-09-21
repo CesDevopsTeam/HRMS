@@ -1,0 +1,451 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+   
+    
+    .welcome-text {
+        margin-right: 20px; /* Space between welcome text and filter form */
+    }
+    
+    .date-filter-form {
+        display: flex;
+        align-items: center; /* Align form items vertically center */
+    }
+    
+    .date-filter-form .form-label {
+        margin-right: 10px; /* Space between label and input */
+    }
+    
+    .date-filter-form .form-control {
+        margin-right: 10px; /* Space between input and button */
+    }
+    
+    .date-filter-form .btn {
+        margin-left: 5px; /* Space on the left of the button */
+    }
+    
+    .btn-info {
+        background-color: #1e90ff;
+        border-color: #1e90ff;
+    }
+    
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    
+    .task-container {
+        display: inline-block;
+        width: 100%;
+        margin-bottom: 10px;
+        vertical-align: top;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 10px;
+    }
+    
+    .scroll-container {
+        overflow-x: hidden;
+        white-space: nowrap;
+    }
+    
+    .horizontal-layout {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between; /* Distribute space evenly */
+    }
+    
+    .section-container {
+        flex: 1;
+        margin: 0 10px;
+        height: 500px;
+        overflow-y: auto; /* Allow vertical scrolling within the section */
+        overflow-x: hidden; /* Prevent horizontal scrolling */
+    }
+    
+    /* Optional: If you want to hide the scrollbar visually but still allow scrolling */
+    .section-container::-webkit-scrollbar {
+        display: none; /* Hide scrollbar in WebKit browsers */
+    }
+    
+    .card-body {
+        padding: 20px;
+        height: auto;
+    }
+    
+    /* CSS for Right-Side Modal */
+    .modal-dialog-end {
+        position: absolute;
+        right: 0;
+        margin: 0;
+        height: 100%;
+        width: 30%;
+    }
+    
+    .modal-content {
+        border-radius: 0;
+        height: 100%;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        border-radius: 2%;
+    }
+    
+    .modal.show .modal-content {
+        transform: translateX(0);
+    }
+    
+    .modal.fade .modal-dialog {
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+    }
+    
+    .modal.show .modal-dialog {
+        transform: translateX(0);
+    }
+    
+    .btn2 {
+        position: relative;
+        display: inline-block;
+        padding: 15px 30px;
+        border: 2px solid #fefefe;
+        text-transform: uppercase;
+        color: #fefefe;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 20px;
+        transition: 0.3s;
+    }
+    
+    .btn2::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        width: calc(100% + 4px);
+        height: calc(100% - -2px);
+        background-color: #212121;
+        transition: 0.3s ease-out;
+        transform: scaleY(1);
+    }
+    
+    .btn2::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        width: calc(100% + 4px);
+        height: calc(100% - 50px);
+        background-color: #212121;
+        transition: 0.3s ease-out;
+        transform: scaleY(1);
+    }
+    
+    .btn2:hover::before {
+        transform: translateY(-25px);
+        height: 0;
+    }
+    
+    .btn2:hover::after {
+        transform: scaleX(0);
+        transition-delay: 0.15s;
+    }
+    
+    .btn2:hover {
+        border: 2px solid #fefefe;
+    }
+    
+    .btn2 span {
+        position: relative;
+        z-index: 3;
+    }
+    
+    button {
+        text-decoration: none;
+        border: none;
+        background-color: transparent;
+    }
+    
+    .flip-card {
+        background-color: transparent;
+        width: 490px;
+        height: 314px;
+        perspective: 1000px;
+        font-family: sans-serif;
+        margin: 10px auto;
+    }
+    
+    .flip-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: transform 0.8s;
+        transform-style: preserve-3d;
+    }
+    
+    .flip-card:hover .flip-card-inner {
+        transform: rotateY(180deg);
+    }
+    
+    .flip-card-front, .flip-card-back {
+        box-shadow: 0 8px 14px 0 rgba(0,0,0,0.2);
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center; /* Center align items */
+        width: 100%;
+        height: 100%;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        border: 1px solid rgb(59, 18, 2);
+        border-radius: 1rem;
+    }
+    
+    .flip-card-front {
+        background: url("{% static 'img/flip1.jpg' %}") no-repeat center center; /* Front image */
+        background-size: cover; /* Ensure the image covers the front */
+        color: white; /* Optional: Change text color for better visibility */
+        padding: 20px; /* Optional padding for better spacing */
+    }
+    
+    .flip-card-back {
+        background: url("{% static 'img/task_page.avif' %}") no-repeat center center; /* Back image */
+        background-size: cover; /* Ensure the image covers the back */
+        transform: rotateY(180deg);
+    }
+    
+    /* Remove hover effects for the back side */
+    .flip-card:hover .flip-card-back {
+        background: url("{% static 'img/task_page.avif' %}") no-repeat center center; /* Keep the image */
+        background-size: cover; /* Ensure it stays covered */
+    }
+    
+</style>
+<div>
+    {% include 'navbar.html' %}
+    
+</div>
+
+
+<div style="background-color: #fcf9f9; width: 300px; padding: 10px; border-radius: 5px; margin-left:570px; margin-top:10px;">
+    <form method="GET" action="{% url 'daily_task' %}" class="date-filter-form" style="display: flex; flex-direction: column; align-items: center;">
+        <input type="date" id="dateFilter" name="date_filter" class="form-control" value="{{ date_filter }}" style="margin-bottom: 10px;">
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Filter</button>
+    </form>
+</div>
+
+
+
+<div class="container-fluid" style="height: 100vh;" >
+    <div class="row horizontal-layout">
+        <!-- Main Content Area -->
+        <div class="col-lg-12">
+            <div class="horizontal-layout">
+                <!-- Assigned Tasks -->
+                <div class="section-container">
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <h5 class="card-title text-center " >Assigned Tasks</h5>
+                            <div class="container">
+                                
+                                {% regroup tasks by assigned_at|date:"Y-m-d" as grouped_tasks %}
+{% for group in grouped_tasks %}
+    {% if request.GET.date_filter == group.grouper or not request.GET.date_filter %}
+        <div class="task-container">
+            <h6 class="text-center">{{ group.grouper }}</h6>
+            <ul class="list-group">
+                {% for task in group.list %}
+                    <div class="flip-card m-3">
+                        <div class="flip-card-inner">
+                            
+                            <div class="flip-card-front" style="color:black; font-family: 'Times New Roman', Times, serif;">
+                                
+                                <!-- New Task Label -->
+                                {% if not task.is_acknowledged %}
+                                <div class="d-flex align-items-center" style="margin-top: 50px;">
+                                    <i class="fas fa-gift" style="color: #ff6347; font-size: 24px;"></i> <!-- Set your desired color -->
+                                    
+                                </div>
+                                {% endif %}
+                                <p class="title">Task Title: {{ task.task_title }}</p>
+                                <p>Assigned Date: {{ task.assigned_at|date:"Y-m-d" }}</p>
+                                <p>Assigned Time: {{ task.assigned_at|date:"H:i:s" }}</p>
+
+
+                                <p>Hover to View Details</p>
+                            </div>
+                            <div class="flip-card-back" style="color:black; font-family: 'Times New Roman', Times, serif;">
+                                <table class="table table-striped">
+                                    <tbody>
+                                        <tr>
+                                            <th>Task</th>
+                                            <td>: {{ task.task_title }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Assigned At</th>
+                                            <td>: {{ task.assigned_at|date:"Y-m-d" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Complete Before</th>
+                                            <td>: {{ task.complete_before|date:"Y-m-d" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Assigned By</th>
+                                            <td>: {% if task.assigned_by %} {{ task.assigned_by.emp_name }} {% else %} N/A {% endif %}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Status</th>
+                                            <td>: {% if task.is_acknowledged %} Acknowledged {% else %} Not Acknowledged {% endif %}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Document</th>
+                                            <td>
+                                                {% if task.document %}
+                                                    <a href="{{ task.document.url }}" target="_blank">View Document</a>
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="row mt-3">
+                                    <div class="col">
+                                        <button type="button" class="btn btn-primary form-control" data-bs-toggle="modal" data-bs-target="#rightSideModal"
+                                            data-task-id="{{ task.id }}"
+                                            data-task-title="{{ task.task_title }}" 
+                                            data-task-description="{{ task.task_description }}"
+                                            data-assigned-at="{{ task.assigned_at|date:'Y-m-d' }}"
+                                            data-complete-before="{{ task.complete_before|date:'Y-m-d' }}">
+                                             Details
+                                        </button>
+                                    </div>
+                                    <div class="col">
+                                        <form method="post" action="{% url 'acknowledge_task' task.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-info form-control btn-sm" {% if task.is_acknowledged %} disabled {% endif %}>
+                                                Acknowledge
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="col">
+                                        <form method="post" action="{% url 'mark_task_completed' task.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success form-control btn-sm" {% if task.is_completed %} disabled {% endif %}>
+                                                Completed
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <li class="list-group-item">No tasks assigned.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% endfor %}
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completed Tasks -->
+                <div class="section-container">
+                    {% include 'completed_tasks.html' %}
+                </div>
+
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+                <!-- Completed Tasks -->
+               
+
+                <!-- Overdue Tasks -->
+               
+              
+   
+
+ <!-- Right-Side Modal -->
+<div class="modal fade" id="rightSideModal" tabindex="-1" aria-labelledby="rightSideModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-end modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="rightSideModalLabel">Task Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body" style="border:2px solid #03ce32;background-color: rgba(0, 255, 17, 0.075);">
+            
+          <table class="table table-bordered table-striped">
+            
+            <tbody>
+              <tr>
+                <th>User</th>
+                <td id="modal-username">{{ username }}</td>
+              </tr>
+              <tr>
+                <th>Task Title</th>
+                <td id="task-title"></td> <!-- Added ID for task title -->
+            </tr>
+              <tr>
+                <th>Task Description</th>
+                <td id="task-description"></td>
+              </tr>
+              <tr>
+                <th>Assigned At</th>
+                <td id="assigned-at"></td>
+              </tr>
+              <tr>
+                <th>Complete Before</th>
+                <td id="complete-before"></td>
+              </tr>
+              
+                
+            </tr>
+             
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var myModal = document.getElementById('rightSideModal')
+        myModal.addEventListener('show.bs.modal', function (event) {
+            // Button that triggered the modal
+            var button = event.relatedTarget
+
+            // Extract info from data-* attributes
+            var taskDescription = button.getAttribute('data-task-description')
+            var assignedAt = button.getAttribute('data-assigned-at')
+            var completeBefore = button.getAttribute('data-complete-before')
+            var taskTitle = button.getAttribute('data-task-title') // Get the task title
+
+            // Update the modal's content.
+            var modalBody = myModal.querySelector('.modal-body')
+
+            modalBody.querySelector('#task-description').textContent = taskDescription
+            modalBody.querySelector('#assigned-at').textContent = assignedAt
+            modalBody.querySelector('#complete-before').textContent = completeBefore
+            modalBody.querySelector('#task-title').textContent = taskTitle // Set the task title
+        })
+    })
+</script>
+
+  
+{% endblock %}

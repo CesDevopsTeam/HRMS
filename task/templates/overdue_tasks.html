@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+   
+    
+    /* Flip card styles */
+    .flip-card {
+        background-color: transparent;
+        width: 490px;
+        height: 314px;
+        perspective: 1000px;
+        font-family: sans-serif;
+        margin: 10px auto;
+    }
+    
+    .flip-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: transform 0.8s;
+        transform-style: preserve-3d;
+    }
+    
+    .flip-card:hover .flip-card-inner {
+        transform: rotateY(180deg);
+    }
+    
+    .flip-card-front, .flip-card-back {
+        box-shadow: 0 8px 14px 0 rgba(0,0,0,0.2);
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center; /* Center align items */
+        width: 100%;
+        height: 100%;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        border: 1px solid rgb(59, 18, 2);
+        border-radius: 1rem;
+    }
+    
+    .flip-card-front {
+        background: url("{% static 'img/flip1.jpg' %}") no-repeat center center;
+        background-size: cover;
+        color: black; /* Changed text color for better visibility */
+        padding: 20px;
+    }
+    
+    .flip-card-back {
+        background: url("{% static 'img/task_page.avif' %}") no-repeat center center;
+        background-size: cover;
+        transform: rotateY(180deg);
+    }
+    .overdue-warning {
+        background-color: #ffcc00; /* Yellow background for warning */
+        color: #000; /* Black text */
+        padding: 15px;
+        border-radius: 5px;
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 30px; /* Space below the warning */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        width: 100%; /* Full width */
+        max-width: 700px; /* Maximum width */
+        margin: 10px auto; /* Center the warning */
+    }
+    
+    
+    .overdue-warning p {
+        margin: 0;
+    }
+    
+</style>
+
+
+  
+   
+        <div>
+            {% include 'navbar.html' %}
+        </div>
+        <div class="row">
+            <!-- Main Content Area -->
+            <div class="card-body">
+                
+        
+                <!-- Overdue Warning -->
+                <div class="overdue-warning" id="overdueWarning">
+                    <p><strong>⚠️ Urgent: These tasks are overdue! Please take action immediately.</strong></p>
+                </div>
+                
+        
+                <!-- Group overdue tasks by 'complete_before' date -->
+                {% regroup overdue_tasks by complete_before|date:"Y-m-d" as grouped_tasks %}
+                {% for group in grouped_tasks %}
+                    <h6 class="text-center">{{ group.grouper }}</h6>
+                    <div class="task-container">
+                        <ul class="list-group">
+                            {% for task in group.list %}
+                            <div class="flip-card">
+                                <div class="flip-card-inner">
+                                    <!-- Front side -->
+                                    <div class="flip-card-front" style="color:black; font-family: 'Times New Roman', Times, serif;">
+                                        <p class="title">Task Title: {{ task.task_title }}</p>
+                                        <p>Overdue Task</p>
+                                        <p>Hover to View Details</p>
+                                    </div>
+        
+                                    <!-- Back side -->
+                                    <div class="flip-card-back">
+                                        <table class="table table-striped" style="margin: 0; color: rgb(50, 14, 1);">
+                                            <tbody>
+                                                <tr>
+                                                    <th>Task</th>
+                                                    <td>: {{ task.task_description }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Assigned At</th>
+                                                    <td>: {{ task.assigned_at|date:"Y-m-d" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Assigned By</th>
+                                                    <td>: {% if task.assigned_by %} {{ task.assigned_by.emp_name }} {% else %} N/A {% endif %}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Complete Before</th>
+                                                    <td>: {{ task.complete_before|date:"Y-m-d" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <td>: {% if task.is_acknowledged %} Acknowledged {% else %} Not Acknowledged {% endif %}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Document:</th>
+                                                    <td>: {% if task.document %}<a href="{{ task.document.url }}" target="_blank">View Document</a>{% else %} N/A {% endif %}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="no-tasks">No overdue tasks found.</div>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+    
+    {% endblock %}

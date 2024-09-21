@@ -1,0 +1,1274 @@
+<!-- bankbranch_form.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css">
+
+<style>
+    .card-header {
+        cursor: pointer;
+    }
+
+    .mandatory::after {
+        content: "*";
+        color: red;
+        margin-left: 4px;
+    }
+    body{
+        background-color: rgb(255, 255, 255);
+    }
+</style>
+
+
+<!-- CSS for Right-Side Modal -->
+<style>
+    .modal-dialog-end {
+      position: absolute;
+      right: 0;
+      margin: 0;
+      height: 100%;
+      width: 50%;
+  
+    }
+  
+    .modal-content {
+      border-radius: 0;
+      height: 100%;
+      transform: translateX(100%);
+      transition: transform 0.3s ease-in-out;
+      border-radius: 2%;
+  
+    }
+    .modal.show .modal-content {
+      transform: translateX(0);
+    }
+    .modal.fade .modal-dialog {
+      transform: translateX(100%);
+      transition: transform 0.3s ease-in-out;
+    }
+  
+    .modal.show .modal-dialog {
+      transform: translateX(0);
+    }
+  </style>
+<div class="row">
+    <!-- Profile Section -->
+    
+    <!-- Include jQuery and DataTables Scripts -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css"/>
+    
+    <!-- Right-Side Modal -->
+    <div class="modal fade" id="rightSideModal" tabindex="-1" aria-labelledby="rightSideModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-end modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h1 class="modal-title fs-5" id="rightSideModalLabel">Assigned Employee ID</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5 class="text-center card-title">
+                    Search For Availability
+                </h5>
+                <div class="container-fluid">
+                    <table id="datatable" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Emp. ID</th>
+                                <th>Emp. Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in employee_list %}
+              <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ data.emp_id }}</td>
+                  <td>{{ data.emp_name }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+$(document).ready(function() {
+  // Ensure DataTable is destroyed and re-initialized every time the modal is shown
+  $('#rightSideModal').on('shown.bs.modal', function () {
+    if ($.fn.DataTable.isDataTable('#datatable')) {
+      $('#datatable').DataTable().destroy();
+    }
+    $('#datatable').DataTable(); // Reinitialize the DataTable
+  });
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="col-12 col-md-9" style="height: 100vh; overflow-y: auto;">
+        <h5 class="card-title text-center">CESINDIA Employee Details</h5>
+
+        <div class="container" id="accordion">
+            <!-- Personal Info Section -->
+            <div class="card">
+                <div class="card-header bg-white text-danger border border-black" id="headingOne">
+                    <h5 class="mb-0">
+                        <a class="collapsed text-decoration-none" data-toggle="collapse" href="#collapseOne"
+                            role="button" aria-expanded="false" aria-controls="collapseOne">
+                            Personal Info
+                            {% if EmpPersonalInfo %}
+                            <i class="bi bi-check-circle-fill float-right"></i>
+                            {% else %}
+                            <i class="bi  bi-x-circle-fill float-right text-danger"></i>
+                            {% endif %}
+                        </a>
+                    </h5>
+                </div>
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                    <div class="card-body border border-black" style="background-color: rgb(248, 246, 246);">
+                        <div class="container my-2 text-center">
+                            {% if EmpPersonalInfo.photo %}
+                            <img src="/media/{{EmpPersonalInfo.photo}}" alt="Profile Photo"
+                                style="width: 150px; height: 150px; object-fit: cover;  border-radius: 100%;" />
+                            {% else %}
+                            <img src="{% static 'img/default.png' %}" alt="Profile Photo"
+                                style="width: 150px; height: 150px; object-fit: cover; border-radius: 100%;" />
+                            {% endif %}
+                        </div>
+
+                        <!-- Personal Info Form -->
+                                <form action="{% url 'Save_Personal_Info' %}" method="POST" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <label for="emp_id" class="form-label mb-1">Employee ID</label>
+                                            <input value="{{EmpPersonalInfo.emp_id}}" type="text" class="form-control form-control-sm" id="emp_id" name="emp_id" maxlength="20" required oninput="check()">
+                                            <p id="show_msg" class="text-danger"></p>
+                                            <!-- Button to trigger the right-side modal -->
+                                            <button type="button" class="btn btn-outline-danger btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#rightSideModal">
+                                            Check Avilability
+                                            </button>   
+                                            
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="emp_name" class="form-label mb-1">Employee Name</label>
+                                            <input value="{{EmpPersonalInfo.emp_name}}"  type="text" class="form-control form-control-sm" id="emp_name" name="emp_name" maxlength="100" required placeholder="As Per Aadhaar">
+                                        </div>
+                                    </div>
+                        
+                                    <div class="row g-2 mt-2">
+                                        <div class="col-md-6">
+                                            <label for="gender" class="form-label mb-1">Gender</label>
+                                            <select class="form-select form-select-sm" id="gender" name="gender" required>
+                                                <option {% if EmpPersonalInfo.gender == "M" %} selected {% endif %} value="M">Male</option>
+                                                <option {% if EmpPersonalInfo.gender == "F" %} selected {% endif %} value="F">Female</option>
+                                                <option {% if EmpPersonalInfo.gender == "O" %} selected {% endif %} value="O">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="dob" class="form-label mb-1">Date of Birth</label>
+                                            <input value="{{ EmpPersonalInfo.dob|date:'Y-m-d' }}" type="date" class="form-control form-control-sm" id="dob" name="dob" required>
+                                        </div>
+                                    </div>
+                        
+                                    <div class="row g-2 mt-2">
+                                        <div class="col-md-12">
+                                            <label for="photo" class="form-label mb-1">Employee Photo</label>
+                                            <input type="file" class="form-control form-control-sm" id="photo" name="photo">
+                                        </div>
+                                    
+                                    </div>
+                        
+                                    <div class="row g-2 mt-3">
+                                        <div class="col-md-12 text-end">
+                                            <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+                                        </div>
+                                    </div>
+                                </form>
+                                
+                        <!-- Include form fields for emp_id, emp_name, gender, dob, photo -->
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <!-- Job Info Section -->
+            <div class="card ">
+                <div class="card-header bg-white text-danger border border-black" id="headingTwo">
+                    <h5 class="mb-0">
+                        <a class="collapsed text-decoration-none" data-toggle="collapse" href="#collapseTwo"
+                            role="button" aria-expanded="false" aria-controls="collapseTwo">
+                            Job Info
+                            {% if EmployeeJobInfo_model %}
+                            <i class="bi bi-check-circle-fill float-right"></i>
+                            {% else %}
+                            <i class="bi  bi-x-circle-fill float-right text-danger"></i>
+                            {% endif %}                        </a>
+                    </h5>
+                </div>
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                    <div class="card-body border border-black" style="background-color: rgb(248, 246, 246);">
+                        <!-- Job Info Form -->
+                        <form action="{% url 'Save_Job_Info' %}" method="POST">
+                            {% csrf_token %}
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label for="doj" class="form-label mb-1"><i class="bi bi-calendar-check-fill"></i> Date of Joining</label>
+                                    <input value="{{ EmployeeJobInfo_model.doj|date:'Y-m-d' }}" type="date" class="form-control form-control-sm" id="doj" name="doj" placeholder="YYYY-MM-DD" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="designation" class="form-label mb-1"><i class="bi bi-briefcase-fill"></i> Designation</label>
+                                    <input value="{{ EmployeeJobInfo_model.designation }}" type="text" class="form-control form-control-sm" id="designation" name="designation" maxlength="100" placeholder="Enter Designation" required>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+    <div class="col-md-6">
+        <label for="office" class="form-label mb-1"><i class="bi bi-building"></i> Office</label>
+        <select class="form-select form-select-sm" id="office" name="office">
+            <option value="">Select Office</option>
+            {% for office in Office_Model %}
+                <option value="{{ office.pk }}" {% if office.pk == EmployeeJobInfo_model.office %}selected{% endif %}>
+                    {{ office.office_name }} ({{ office.office_code }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label for="department" class="form-label mb-1"><i class="bi bi-diagram-3-fill"></i> Department</label>
+        <select class="form-select form-select-sm" id="department" name="department">
+            <option value="">Select Department</option>
+            {% for department in Department_Model %}
+                <option value="{{ department.pk }}" {% if department.pk == EmployeeJobInfo_model.department %}selected{% endif %}>
+                    {{ department.department_name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="row g-2 mt-2">
+    <div class="col-md-6">
+        <label for="role" class="form-label mb-1"><i class="bi bi-person-badge-fill"></i> Role</label>
+        <select class="form-select form-select-sm" id="role" name="role">
+            <option value="">Select Role</option>
+            {% for role in Role_Model %}
+                <option value="{{ role.pk }}" {% if role.pk == EmployeeJobInfo_model.role %}selected{% endif %}>
+                    {{ role.role_name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+                                <div class="col-md-6">
+                                    <label for="qualifications" class="form-label mb-1"><i class="bi bi-award-fill"></i> Qualifications</label>
+                                    <input value="{{ EmployeeJobInfo_model.qualifications }}" type="text" class="form-control form-control-sm" id="qualifications" name="qualifications" maxlength="200" placeholder="Enter Qualifications" required>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-6">
+                                    <label for="skills" class="form-label mb-1"><i class="bi bi-tools"></i> Skills</label>
+                                    <textarea class="form-control form-control-sm" id="skills" name="skills" rows="2" placeholder="List your skills">{{ EmployeeJobInfo_model.skills }}</textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="certifications" class="form-label mb-1"><i class="bi bi-file-earmark-certificate-fill"></i> Certifications</label>
+                                    <textarea class="form-control form-control-sm" id="certifications" name="certifications" rows="2" placeholder="List certifications">{{ EmployeeJobInfo_model.certifications }}</textarea>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="achievements" class="form-label mb-1"><i class="bi bi-trophy-fill"></i> Achievements</label>
+                                    <textarea class="form-control form-control-sm" id="achievements" name="achievements" rows="2" placeholder="List achievements">{{ EmployeeJobInfo_model.achievements }}</textarea>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-3">
+                                <div class="col-md-12 text-end">
+                                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save-fill"></i> Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <!-- Include form fields for doj, designation, branch, department, role, qualifications, skills, certifications, achievements -->
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <!-- Contact Info Section -->
+            <div class="card ">
+                <div class="card-header bg-white text-danger border border-black" id="headingThree">
+                    <h5 class="mb-0">
+                        <a class="collapsed text-decoration-none" data-toggle="collapse" href="#collapseThree"
+                            role="button" aria-expanded="false" aria-controls="collapseThree">
+                            Contact Info
+                            {% if EmployeeContactInfo_model %}
+                            <i class="bi bi-check-circle-fill float-right"></i>
+                            {% else %}
+                            <i class="bi  bi-x-circle-fill float-right text-danger"></i>
+                            {% endif %}                        </a>
+                    </h5>
+                </div>
+                <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+                    <div class="card-body border border-black" style="background-color: rgb(248, 246, 246);">
+                        <!-- Contact Info Form -->
+                        <form action="{% url 'Save_Contact_Info' %}" method="POST">
+                            {% csrf_token %}
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label for="mobile" class="form-label mb-1"><i class="bi bi-phone-fill"></i> Mobile Number</label>
+                                    <input value="{{ EmployeeContactInfo_model.mobile }}" type="text" class="form-control form-control-sm" id="mobile" name="mobile" maxlength="15" placeholder="Enter Mobile Number" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="whatsapp" class="form-label mb-1"><i class="bi bi-whatsapp"></i> WhatsApp Number</label>
+                                    <input value="{{ EmployeeContactInfo_model.whatsapp }}" type="text" class="form-control form-control-sm" id="whatsapp" name="whatsapp" maxlength="15" placeholder="Enter WhatsApp Number">
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label mb-1"><i class="bi bi-envelope-fill"></i> Email</label>
+                                    <input value="{{ EmployeeContactInfo_model.email }}" type="email" class="form-control form-control-sm" id="email" name="email" placeholder="Enter Email" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="work_location" class="form-label mb-1"><i class="bi bi-geo-alt-fill"></i> Work Location</label>
+                                    <input value="{{ EmployeeContactInfo_model.work_location }}" type="text" class="form-control form-control-sm" id="work_location" name="work_location" maxlength="100" placeholder="Enter Work Location" required>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="residential_address" class="form-label mb-1"><i class="bi bi-house-fill"></i> Residential Address</label>
+                                    <textarea class="form-control form-control-sm" id="residential_address" name="residential_address" rows="2" placeholder="Enter Residential Address" required>{{ EmployeeContactInfo_model.residential_address }}</textarea>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-6">
+                                    <label for="emergency_contact_name" class="form-label mb-1"><i class="bi bi-person-fill"></i> Emergency Contact Name</label>
+                                    <input value="{{ EmployeeContactInfo_model.emergency_contact_name }}" type="text" class="form-control form-control-sm" id="emergency_contact_name" name="emergency_contact_name" maxlength="100" placeholder="Enter Emergency Contact Name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="emergency_contact_phone" class="form-label mb-1"><i class="bi bi-telephone-fill"></i> Emergency Contact Phone</label>
+                                    <input value="{{ EmployeeContactInfo_model.emergency_contact_phone }}" type="text" class="form-control form-control-sm" id="emergency_contact_phone" name="emergency_contact_phone" maxlength="15" placeholder="Enter Emergency Contact Phone" required>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="family_contact_details" class="form-label mb-1"><i class="bi bi-people-fill"></i> Family Contact Details</label>
+                                    <textarea class="form-control form-control-sm" id="family_contact_details" name="family_contact_details" rows="2" placeholder="Enter Family Contact Details" required>{{ EmployeeContactInfo_model.family_contact_details }}</textarea>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-3">
+                                <div class="col-md-12 text-end">
+                                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save-fill"></i> Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <!-- Include form fields for mobile, email, residential_address, work_location, emergency_contact_name, emergency_contact_phone, family_contact_details -->
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <!-- Financial Info Section -->
+            <div class="card ">
+                <div class="card-header bg-white text-danger border border-black" id="headingFour">
+                    <h5 class="mb-0">
+                        <a class="collapsed text-decoration-none" data-toggle="collapse" href="#collapseFour"
+                            role="button" aria-expanded="false" aria-controls="collapseFour">
+                            Financial Info
+                            {% if EmployeeFinancialInfo_model %}
+                            <i class="bi bi-check-circle-fill float-right"></i>
+                            {% else %}
+                            <i class="bi  bi-x-circle-fill float-right text-danger"></i>
+                            {% endif %}                        </a>
+                    </h5>
+                </div>
+                <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordion">
+                    <div class="card-body border border-black" style="background-color: rgb(248, 246, 246);">
+                        <!-- Financial Info Form -->
+                        <form action="{% url 'Save_Financial_Info' %}" method="POST">
+                            {% csrf_token %}
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label for="bank_account_number" class="form-label mb-1"><i class="bi bi-bank"></i> Bank Account Number</label>
+                                    <input value="{{ EmployeeFinancialInfo_model.bank_account_number }}" type="text" class="form-control form-control-sm" id="bank_account_number" name="bank_account_number" maxlength="20" placeholder="Enter Bank Account Number" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="pan_number" class="form-label mb-1"><i class="bi bi-card-text"></i> PAN Number</label>
+                                    <input value="{{ EmployeeFinancialInfo_model.pan_number }}" type="text" class="form-control form-control-sm" id="pan_number" name="pan_number" maxlength="10" placeholder="Enter PAN Number" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="aadhaar_number" class="form-label mb-1"><i class="bi bi-card-text"></i> Aadhaar Number</label>
+                                    <input value="{{ EmployeeFinancialInfo_model.aadhaar_number }}" type="text" class="form-control form-control-sm" id="pan_number" name="aadhaar_number" maxlength="10" placeholder="Enter Aadhaar Number" required>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="aadhaar_linked_pan" class="form-label mb-1"><i class="bi bi-check-circle-fill"></i> Aadhaar Linked with PAN</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="aadhaar_linked_pan" name="aadhaar_linked_pan" {% if EmployeeFinancialInfo_model.aadhaar_linked_pan %}checked{% endif %}>
+                                        <label class="form-check-label" for="aadhaar_linked_pan">Yes</label>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-3">
+                                <div class="col-md-12 text-end">
+                                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save-fill"></i> Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <!-- Include form fields for bank_account_number, pan_number, aadhaar_linked_pan -->
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <!-- Document Info Section -->
+            <div class="card ">
+                <div class="card-header bg-white text-danger border border-black" id="headingFive">
+                    <h5 class="mb-0">
+                        <a class="collapsed text-decoration-none" data-toggle="collapse" href="#collapseFive"
+                            role="button" aria-expanded="false" aria-controls="collapseFive">
+                            Document Info
+                            {% if EmployeeDocuments_model %}
+                            <i class="bi bi-check-circle-fill float-right"></i>
+                            {% else %}
+                            <i class="bi  bi-x-circle-fill float-right text-danger"></i>
+                            {% endif %}                        </a>
+                    </h5>
+                </div>
+                <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordion">
+                    <div class="card-body border border-black" style="background-color: rgb(248, 246, 246);">
+                        <!-- Document Info Form -->
+                        <form action="{% url 'Save_Documents_Info' %}" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="row g-2">
+                                <div class="col-md-12">
+                                    <label for="previous_employer_details" class="form-label mb-1"><i class="bi bi-briefcase-fill"></i> Previous Employer Details</label>
+                                    <textarea class="form-control form-control-sm" id="previous_employer_details" name="previous_employer_details" rows="3" placeholder="Enter Previous Employer Details" required>{{ EmployeeDocuments_model.previous_employer_details }}</textarea>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-6">
+                                    <label for="previous_employer_contact_mobile" class="form-label mb-1"><i class="bi bi-telephone-fill"></i> Previous Employer Contact Mobile</label>
+                                    <input value="{{ EmployeeDocuments_model.previous_employer_contact_mobile }}" type="text" class="form-control form-control-sm" id="previous_employer_contact_mobile" name="previous_employer_contact_mobile" maxlength="15" placeholder="Enter Previous Employer Contact Mobile" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="previous_employer_contact_email" class="form-label mb-1"><i class="bi bi-envelope-fill"></i> Previous Employer Contact Email</label>
+                                    <input value="{{ EmployeeDocuments_model.previous_employer_contact_email }}" type="email" class="form-control form-control-sm" id="previous_employer_contact_email" name="previous_employer_contact_email" placeholder="Enter Previous Employer Contact Email" required>
+                                </div>
+                            </div>
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-6">
+                                    <label for="cibil_report" class="form-label mb-1"><i class="bi bi-file-earmark-pdf-fill"></i> CIBIL Report</label>
+                                    <input type="file" class="form-control form-control-sm" id="cibil_report" name="cibil_report">
+                                    {% if EmployeeDocuments_model.cibil_report %}
+                                    <a target="_blank" href="/media/{{ EmployeeDocuments_model.cibil_report }}" class="form-control mt-2">Preview CIBIL Report</a>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="pcc" class="form-label mb-1"><i class="bi bi-file-earmark-pdf-fill"></i> Police Clearance Certificate</label>
+                                    <input type="file" class="form-control form-control-sm" id="pcc" name="pcc">
+                                    {% if EmployeeDocuments_model.pcc %}
+                                    <a target="_blank" href="/media/{{ EmployeeDocuments_model.pcc }}" class="form-control mt-2">Preview PCC</a>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-3">
+                                <div class="col-md-12 text-end">
+                                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save-fill"></i> Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <!-- Include form fields for previous_employer_details, previous_employer_contact_mobile, previous_employer_contact_email, cibil_report, pcc -->
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+            <!-- Health Info Section -->
+            <div class="card ">
+                <div class="card-header bg-white text-danger border border-black" id="headingSix">
+                    <h5 class="mb-0">
+                        <a class="collapsed text-decoration-none" data-toggle="collapse" href="#collapseSix"
+                            role="button" aria-expanded="false" aria-controls="collapseSix">
+                            Health Info
+                            {% if EmployeeHealthInfo_model %}
+                            <i class="bi bi-check-circle-fill float-right"></i>
+                            {% else %}
+                            <i class="bi  bi-x-circle-fill float-right text-danger"></i>
+                            {% endif %}                        </a>
+                    </h5>
+                </div>
+                <div id="collapseSix" class="collapse" aria-labelledby="headingSix" data-parent="#accordion">
+                    <div class="card-body border border-black" style="background-color: rgb(248, 246, 246);">
+                        <!-- Health Info Form -->
+                        <form action="{% url 'Save_Health_Info' %}" method="POST">
+                            {% csrf_token %}
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label for="blood_group" class="form-label mb-1"><i class="bi bi-heart-fill"></i> Blood Group</label>
+                                    <input value="{{ EmployeeHealthInfo_model.blood_group }}" type="text" class="form-control form-control-sm" id="blood_group" name="blood_group" maxlength="3" placeholder="Enter Blood Group" required>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="mental_health" class="form-label mb-1"><i class="bi bi-emoji-heart-eyes"></i> Mental Health</label>
+                                    <textarea class="form-control form-control-sm" id="mental_health" name="mental_health" rows="3" placeholder="Enter Mental Health Details">{{ EmployeeHealthInfo_model.mental_health }}</textarea>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="medical_health" class="form-label mb-1"><i class="bi bi-plus-circle-fill"></i> Medical Health</label>
+                                    <textarea class="form-control form-control-sm" id="medical_health" name="medical_health" rows="3" placeholder="Enter Medical Health Details">{{ EmployeeHealthInfo_model.medical_health }}</textarea>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-3">
+                                <div class="col-md-12 text-end">
+                                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save-fill"></i> Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <!-- Include form fields for blood_group, mental_health, medical_health -->
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <!-- Verification Info Section -->
+            <div class="card ">
+                <div class="card-header bg-white text-danger border border-black" id="headingSeven">
+                    <h5 class="mb-0">
+                        <a class="collapsed text-decoration-none" data-toggle="collapse" href="#collapseSeven"
+                            role="button" aria-expanded="false" aria-controls="collapseSeven">
+                            Verification Info
+                            {% if EmployeeVerification_model %}
+                            <i class="bi bi-check-circle-fill float-right"></i>
+                            {% else %}
+                            <i class="bi  bi-x-circle-fill float-right text-danger"></i>
+                            {% endif %}                        </a>
+                    </h5>
+                </div>
+                <div id="collapseSeven" class="collapse" aria-labelledby="headingSeven" data-parent="#accordion">
+                    <div class="card-body border border-black" style="background-color: rgb(248, 246, 246);">
+                        <!-- Verification Info Form -->
+                        <form action="{% url 'Save_Verification_Info' %}" method="POST">
+                            {% csrf_token %}
+                            <div class="row g-2">
+                                <div class="col-md-12">
+                                    <label for="residential_address_verification" class="form-label mb-1"><i class="bi bi-house-check-fill"></i> Residential Address Verification Done</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="residential_address_verification" name="residential_address_verification" {% if EmployeeVerification_model.residential_address_verification %}checked{% endif %}>
+                                        <label class="form-check-label" for="residential_address_verification">Yes</label>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="previous_employer_verification" class="form-label mb-1"><i class="bi bi-briefcase-check-fill"></i> Previous Employer Verification Done</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="previous_employer_verification" name="previous_employer_verification" {% if EmployeeVerification_model.previous_employer_verification %}checked{% endif %}>
+                                        <label class="form-check-label" for="previous_employer_verification">Yes</label>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="residential_address_gps" class="form-label mb-1"><i class="bi bi-geo-alt-fill"></i> Residential Address GPS Location</label>
+                                    <input value="{{ EmployeeVerification_model.residential_address_gps }}" type="text" class="form-control form-control-sm" id="residential_address_gps" name="residential_address_gps" maxlength="100" placeholder="Enter Residential Address GPS Location">
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-3">
+                                <div class="col-md-12 text-end">
+                                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save-fill"></i> Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <!-- Include form fields for residential_address_verification, previous_employer_verification, residential_address_gps -->
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <!-- Salary Deduction Info Section -->
+            <div class="card ">
+                <div class="card-header bg-white text-danger border border-black" id="headingEight">
+                    <h5 class="mb-0">
+                        <a class="collapsed text-decoration-none" data-toggle="collapse" href="#collapseEight"
+                            role="button" aria-expanded="false" aria-controls="collapseEight">
+                            Salary Deduction Info
+                            {% if EmployeeSalaryDeduction_model %}
+                            <i class="bi bi-check-circle-fill float-right"></i>
+                            {% else %}
+                            <i class="bi  bi-x-circle-fill float-right text-danger"></i>
+                            {% endif %}                        </a>
+                    </h5>
+                </div>
+                <div id="collapseEight" class="collapse" aria-labelledby="headingEight" data-parent="#accordion">
+                    <div class="card-body border border-black" style="background-color: rgb(248, 246, 246);">
+                        <!-- Salary Deduction Info Form -->
+                        <form action="{% url 'Save_Salary_Deduction_Info' %}" method="POST">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                
+                            <div class="row g-2">
+                                <div class="col-md-12">
+                                    <label for="pf" class="form-label mb-1"><i class="bi bi-cash-stack"></i> PF Deducted</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="pf" name="pf" {% if EmployeeSalaryDeduction_model.pf %}checked{% endif %}>
+                                        <label class="form-check-label" for="pf">Yes</label>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="esic" class="form-label mb-1"><i class="bi bi-cash-stack"></i> ESIC Deducted</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="esic" name="esic" {% if EmployeeSalaryDeduction_model.esic %}checked{% endif %}>
+                                        <label class="form-check-label" for="esic">Yes</label>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="pt" class="form-label mb-1"><i class="bi bi-cash-stack"></i> PT Deducted</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="pt" name="pt" {% if EmployeeSalaryDeduction_model.pt %}checked{% endif %}>
+                                        <label class="form-check-label" for="pt">Yes</label>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="lwf" class="form-label mb-1"><i class="bi bi-cash-stack"></i> LWF Deducted</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="lwf" name="lwf" {% if EmployeeSalaryDeduction_model.lwf %}checked{% endif %}>
+                                        <label class="form-check-label" for="lwf">Yes</label>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="tds" class="form-label mb-1"><i class="bi bi-cash-stack"></i> TDS Deducted</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="tds" name="tds" {% if EmployeeSalaryDeduction_model.tds %}checked{% endif %}>
+                                        <label class="form-check-label" for="tds">Yes</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+
+                        <!-- another column -->
+                         
+                        <div class="col-md-6">
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="tds" class="form-label mb-1"><i class="bi bi-cash-stack"></i> Basic Salary Count Days</label>
+                                    <div class="form-check">
+                                        <input type="number" class="form-control" id="bscd" name="bscd" value="{{ EmployeeSalaryDeduction_model.BSCD }}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="tds" class="form-label mb-1"><i class="bi bi-cash-stack"></i> Employee Labour Welfare Amount</label>
+                                    <div class="form-check">
+                                        <input type="number" class="form-control" id="employee_lwf_AMT" name="employee_lwf_AMT" value="{{ EmployeeSalaryDeduction_model.employee_lwf_AMT }}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="tds" class="form-label mb-1"><i class="bi bi-cash-stack"></i> Employers Labour Welfare Amount</label>
+                                    <div class="form-check">
+                                        <input type="number" class="form-control" id="employers_lwf_AMT" name="employers_lwf_AMT" value="{{ EmployeeSalaryDeduction_model.employers_lwf_AMT }}">
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+                        </div>
+                        <div class="row g-2 mt-3">
+                            <div class="col-md-12 text-end">
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save-fill"></i> Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                        
+                        <!-- Include form fields for pf, esic, pt, lwf, tds -->
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <!-- Salary Earning Info Section -->
+            <div class="card ">
+                <div class="card-header bg-white text-danger border border-black" id="headingNine">
+                    <h5 class="mb-0">
+                        <a class="collapsed text-decoration-none" data-toggle="collapse" href="#collapseNine"
+                            role="button" aria-expanded="false" aria-controls="collapseNine">
+                            Salary Earning Info
+                            {% if EmployeeSalaryEarning_model %}
+                            <i class="bi bi-check-circle-fill float-right"></i>
+                            {% else %}
+                            <i class="bi  bi-x-circle-fill float-right text-danger"></i>
+                            {% endif %}                        </a>
+                    </h5>
+                </div>
+                <div id="collapseNine" class="collapse" aria-labelledby="headingNine" data-parent="#accordion">
+                    <div class="card-body border border-black" style="background-color: rgb(248, 246, 246);">
+                        <!-- Salary Earning Info Form -->
+                        <form action="{% url 'Save_Salary_Earning_Info' %}" method="POST">
+                            {% csrf_token %}
+                            <div class="row g-2">
+                                <div class="col-md-12">
+                                    <label for="basic_salary" class="form-label mb-1"><i class="bi bi-cash"></i>Basic Salary</label>
+                                    <input value="{{ EmployeeSalaryEarning_model.basic_salary }}" type="number" step="0.01" class="form-control form-control-sm" id="basic_salary" name="basic_salary" placeholder="Enter Basic Salary" required>
+                                </div>
+                        </div>
+                            <div class="row g-2">
+                                <div class="col-md-12">
+                                    <label for="da" class="form-label mb-1"><i class="bi bi-cash"></i>Dearness Allowance</label>
+                                    <input value="{{ EmployeeSalaryEarning_model.da }}" type="number" step="0.01" class="form-control form-control-sm" id="da" name="da" placeholder="Enter Dearness Allowance" required>
+                                </div>
+                        </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="bonus" class="form-label mb-1"><i class="bi bi-gift"></i> Bonus Addition</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="bonus" name="bonus" {% if EmployeeSalaryEarning_model.Bonus %}checked{% endif %}>
+                                        <label class="form-check-label" for="bonus">Yes</label>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="hra" class="form-label mb-1"><i class="bi bi-house-door"></i> HRA Addition</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="hra" name="hra" {% if EmployeeSalaryEarning_model.HRA %}checked{% endif %}>
+                                        <label class="form-check-label" for="hra">Yes</label>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="travel_claim_allowed" class="form-label mb-1"><i class="bi bi-car-front"></i> Travel Claim Allowed</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="travel_claim_allowed" name="travel_claim_allowed" {% if EmployeeSalaryEarning_model.travel_claim_allowed %}checked{% endif %}>
+                                        <label class="form-check-label" for="travel_claim_allowed">Yes</label>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-2">
+                                <div class="col-md-12">
+                                    <label for="overtime_allowance" class="form-label mb-1"><i class="bi bi-clock"></i> Overtime Allowance</label>
+                                    <input value="{{ EmployeeSalaryEarning_model.overtime_allowance }}" type="number" step="0.01" class="form-control form-control-sm" id="overtime_allowance" name="overtime_allowance" placeholder="Enter Overtime Allowance">
+                                </div>
+                            </div>
+                        
+                            <div class="row g-2 mt-3">
+                                <div class="col-md-12 text-end">
+                                    <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save-fill"></i> Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <!-- Include form fields for basic, hra, spl_allowance, incentives, bonus -->
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+          <!-- Employee Status Section -->
+<div class="card">
+    <div class="card-header bg-white text-danger border border-black" id="headingTen">
+        <h5 class="mb-0">
+            <a class="collapsed text-decoration-none" data-toggle="collapse" href="#collapseTen"
+                role="button" aria-expanded="false" aria-controls="collapseTen">
+                Employee Status
+                {% if EmployeeStatus_model %}
+                <i class="bi bi-check-circle-fill float-right"></i>
+                {% else %}
+                <i class="bi bi-x-circle-fill float-right text-danger"></i>
+                {% endif %}
+            </a>
+        </h5>
+    </div>
+    <div id="collapseTen" class="collapse" aria-labelledby="headingTen" data-parent="#accordion">
+        <div class="card-body border border-black" style="background-color: rgb(248, 246, 246);">
+            <!-- Employee Status Form -->
+            <form action="{% url 'Save_Employee_Status' %}" method="POST">
+                {% csrf_token %}
+                <div class="container mt-4">
+                    <div class="row g-4">
+                        <!-- Dropdown for Active/Inactive status -->
+                        <div class="col-md-6">
+                            <label for="employment_status" class="form-label fw-bold">Employment Status</label>
+                            <select class="form-select form-select-lg" id="employment_status" name="employment_status" required>
+                                <option value="">Select</option>
+                                <option value="Active" {% if EmployeeStatus_model and EmployeeStatus_model.employment_status == "Active" %}selected{% endif %}>Active</option>
+                                <option value="Inactive" {% if EmployeeStatus_model and EmployeeStatus_model.employment_status == "Inactive" %}selected{% endif %}>Inactive</option>
+                            </select>
+                            <p class="text-danger mt-2">
+                                If the status is <span class="text-success fw-bold">Active</span>, then consider the employee for salary and other activities.
+                            </p>
+                        </div>
+                    </div>
+            
+                    <div class="row g-4 mt-4">
+                        <!-- Checkboxes for additional employment statuses -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Additional Status</label>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" id="notice_period" name="notice_period" {% if EmployeeStatus_model and EmployeeStatus_model.notice_period %}checked{% endif %}>
+                                <label class="form-check-label" for="notice_period">Notice Period</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" id="resigned" name="resigned" {% if EmployeeStatus_model and EmployeeStatus_model.resigned %}checked{% endif %}>
+                                <label class="form-check-label" for="resigned">Resigned</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" id="terminated" name="terminated" {% if EmployeeStatus_model and EmployeeStatus_model.terminated %}checked{% endif %}>
+                                <label class="form-check-label" for="terminated">Terminated</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" id="dead" name="dead" {% if EmployeeStatus_model and EmployeeStatus_model.dead %}checked{% endif %}>
+                                <label class="form-check-label" for="dead">Dead</label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input type="checkbox" class="form-check-input" id="training_period" name="training_period" {% if EmployeeStatus_model and EmployeeStatus_model.training_period %}checked{% endif %}>
+                                <label class="form-check-label" for="training_period">Training Period</label>
+                            </div>
+                        </div>
+                    </div>
+            <div class="mb-3">
+                        <label for="username" class="form-label"><i class="bi bi-person-fill"></i> Username</label>
+                        <input value="{{EmployeeLogin_model.username}}" type="text" class="form-control form-control-lg" id="username" name="username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label"><i class="bi bi-lock-fill"></i> Password</label>
+                        <input value="{{EmployeeLogin_model.password}}" type="password" class="form-control form-control-lg" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                    <div class="row g-4 mt-4">
+                        <div class="col-md-12 text-end">
+                            <button type="submit" class="btn btn-success btn-lg">Save Status</button>
+                        </div>
+                    </div>
+                </div>
+            
+            </form>
+                                    
+                        <!-- Include form fields for basic, hra, spl_allowance, incentives, bonus -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+
+
+
+
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Profile Section -->
+    <div class="col-12 col-md-3 p-3" style="height: 100vh; overflow-y: auto; background-color: rgba(255, 0, 0, 0.953);">
+        <div class="card p-3 text-center bg-danger text-white">
+            <div class="container-fluid text-center">
+
+                {% if EmpPersonalInfo.photo %}
+                <img src="/media/{{EmpPersonalInfo.photo}}" alt="Profile Photo"
+                style="width: 200px; height: 200px; object-fit: cover;  border-radius: 100%;" />
+                <h5 class="form-control mt-1">
+                    <b>{{EmpPersonalInfo.emp_name}}</b>
+                </h5>     
+                <p class=" ">
+                    {{EmpPersonalInfo.emp_id}}
+                </p>     
+                {% else %}
+                <img src="{% static 'img/default.png' %}" alt="Profile Photo"
+                style="width: 200px; height: 200px; object-fit: cover; border-radius: 100%;" />
+                {% endif %}   
+            </div>
+        </div>
+
+
+
+
+
+
+            <div class="card p-2">
+                <div class="container">
+                    <img src="{% static 'img/logos.png' %}" alt="Profile Photo"
+                    style=" height: 50px; object-fit: cover; " />
+    
+                </div>
+                <p class="text-danger text-center"><b>CHANKYA E-SERVICES PVT.LTD</b></p>
+
+                <!-- Front Side of the Card -->
+                <div class="card-body  mt-0">
+                    <div class="container-fluid text-center">
+                        
+                        {% if EmpPersonalInfo.photo %}
+                        <img src="/media/{{EmpPersonalInfo.photo}}" alt="Profile Photo"
+                        style="width: 100px; height: 100px; object-fit: cover;  border-radius: 100%; border: 2px solid red;" />
+                        {% else %}
+                        <img src="{% static 'img/default.png' %}" alt="Profile Photo"
+                        style="width: 100px; height: 100px; object-fit: cover; border-radius: 100%;" />
+                        {% endif %}
+                    </div>
+
+
+
+                    <h5 class="card-title text-dark text-center">{{ EmpPersonalInfo.emp_name }}</h5>
+                    <table class="">
+                        <tr>
+                            <td><b>ID </b> </td>
+                            <td> :{{EmpPersonalInfo.emp_id}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Designation </b> </td>
+                            <td> :{{EmployeeJobInfo_model.designation}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Gender </b> </td>
+                            <td> :{{EmpPersonalInfo.gender}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>DOJ </b> </td>
+                            <td> :{{EmployeeJobInfo_model.doj | date:'d-m-Y'}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>DOB </b></td>
+                            <td> :{{EmpPersonalInfo.dob | date:'d-m-Y'}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Aadhaar </b> </td>
+                            <td> :{{EmployeeFinancialInfo_model.aadhaar_number}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Contact No. </b> </td>
+                            <td> :{{EmployeeContactInfo_model.mobile}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- Back Side of the Card (shown upon flipping) -->
+                <div class="card-body text-center bg-light d-none" id="card-back">
+                    <table class="text-center">
+                        <tr>
+                            <td><b>Address </b> </td>
+                            <td> :{{EmployeeContactInfo_model.residential_address}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Office Address </b> </td>
+                            <td> :{{EmployeeContactInfo_model.work_location}}</td>
+                        </tr>
+                    </table>                </div>
+                <!-- Flip Button -->
+                <div class="card-footer text-center">
+                    <button class="btn btn-secondary" onclick="toggleCard()">Flip Card</button>
+                </div>
+            </div>
+    
+        <!-- JavaScript for Flip and Download -->
+        <script>
+            function toggleCard() {
+                const cardBack = document.getElementById('card-back');
+                cardBack.classList.toggle('d-none');
+            }
+        </script>
+
+
+
+
+
+
+
+
+
+
+{% if EmpPersonalInfo %}
+<div class="card p-3 " style="background-color: rgb(140, 8, 8); color: white; border: 2px solid white;">
+            <Button class="btn btn-sm text-white  mb-2">Employee Session Already Started</Button>        
+            <a href="/Attendance/ClearSession/">
+
+                
+                <Button class="btn btn-sm btn-danger form-control">Refresh Session</Button>        
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<script>function check() {
+    const emp_id = document.getElementById("emp_id").value;
+    $.ajax({
+        url: '/Attendance/Check_Availability/',
+        type: 'GET',
+        data: { 'emp_id': emp_id },
+        success: function(response) {
+            const show_msg = document.getElementById("show_msg");
+            if (response.assigned) {
+                show_msg.innerText = `Already Assigned to ${response.name}. If you submit, the existing record will be modified.`;
+                show_msg.classList.remove('text-success');
+                show_msg.classList.add('text-danger');
+            } else {
+                show_msg.innerText = "Employee ID is available.";
+                show_msg.classList.remove('text-danger');
+                show_msg.classList.add('text-success');
+            }
+        }
+    });
+}
+
+</script>
+<!-- Include Bootstrap JS and any other required scripts -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+
+
+{% endblock %}

@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+
+<style>
+    body {
+        background-image: url('/static/img/task_page.avif'); /* Replace with your actual image path */
+        background-size: cover; /* Cover the entire background */
+        background-position: center; /* Center the image */
+        background-repeat: no-repeat; /* Prevent repeating the image */
+    }
+    .filter-container {
+        margin-top: 20px;
+        margin-left: 400px;
+        display: flex;
+        width: 800px;
+        
+        padding: 20px;
+        background-color: #f9f9f9; /* Light background for the form */
+        border-radius: 8px; /* Rounded corners */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    }
+    
+    .form-group {
+        margin-bottom: 0; /* No margin at the bottom for horizontal layout */
+    }
+    
+    .form-group input {
+        width: 250px; /* Set a fixed width for inputs */
+    }
+    
+    button {
+        align-self: center; /* Center the button vertically */
+    }
+    .rating-form {
+        background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+        border-radius: 8px; /* Rounded corners */
+        padding: 20px; /* Padding for spacing */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+        max-width: 400px; /* Limit width */
+        margin: 20px auto; /* Center the form */
+    }
+
+    .rating-form h4 {
+        margin-bottom: 15px; /* Spacing below the title */
+        font-family: 'Arial', sans-serif; /* Font style */
+        color: #333; /* Darker text color */
+    }
+
+    .rating-form select,
+    .rating-form textarea,
+    .rating-form button {
+        width: 100%; /* Full width */
+        padding: 10px; /* Padding for inputs */
+        margin-bottom: 15px; /* Space between inputs */
+        border: 1px solid #ddd; /* Light border */
+        border-radius: 5px; /* Rounded corners */
+        font-size: 16px; /* Font size */
+    }
+
+    .rating-form select:focus,
+    .rating-form textarea:focus,
+    .rating-form button:focus {
+        outline: none; /* Remove outline */
+        border-color: #1e90ff; /* Blue border on focus */
+    }
+
+    .rating-form button {
+        background-color: #1e90ff; /* Button color */
+        color: white; /* Text color */
+        border: none; /* No border */
+        cursor: pointer; /* Pointer cursor */
+        transition: background-color 0.3s; /* Transition for hover effect */
+    }
+
+    .rating-form button:hover {
+        background-color: #007bff; /* Darker shade on hover */
+    }
+    
+    
+    /* Your existing styles */
+</style>
+<div>
+    {% include 'navbar.html' %}
+</div>
+
+
+
+<!-- Date filter form -->
+<div class="filter-container">
+    <form method="GET" class="mb-3 d-flex flex-wrap">
+        <div class="form-group me-3">
+            <label for="date">Select Date:</label>
+            <input type="date" name="date" id="date" class="form-control" value="{{ selected_date }}">
+        </div>
+        
+        <div class="form-group me-3">
+            <label for="employee_name">Employee Name:</label>
+            <input type="text" name="employee_name" id="employee_name" class="form-control" value="{{ employee_name }}" placeholder="Enter employee name">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+</div>
+
+<div style="background-color: rgb(245, 247, 249);">
+{% if assigned_tasks %}
+    <div class="task-container" style="margin-top: 10px;">
+        <table class="table table-striped" id="tasksTable">
+            <thead>
+                <tr>
+                    <th>Task Title</th>
+                    <th>Assigned At</th>
+                    <th>Complete Before</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th>Document</th>
+                    <th>Acknowledge status</th>
+                    
+
+                    <th>Rate</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in assigned_tasks %}
+                <tr>
+                    <td>{{ task.task_title }}</td>
+                    <td>{{ task.assigned_at|date:"Y-m-d" }}</td>
+                    <td>{{ task.complete_before|date:"Y-m-d" }}</td>
+                    <td>{% if task.is_completed %} Completed {% else %} Pending {% endif %}</td>
+                    <td>{% if task.employee %} {{ task.employee.emp_name }} {% else %} N/A {% endif %}</td>
+                    <td>
+                        {% if task.document %}
+                            <a href="{{ task.document.url }}" target="_blank">View Document</a>
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if task.is_acknowledged %}
+                            <span class="text-success">Acknowledged</span>
+                        {% else %}
+                            <span class="text-danger">Not Acknowledged</span>
+                        {% endif %}
+                    </td>
+                    
+                    <td>
+                        {% if task.is_completed %}
+                            {% if task.ratings_list.count > 0 %}
+                                {% for rating in task.ratings_list %}
+                                 
+                                    {% for i in "12345"|make_list %}
+                                        {% if i|add:0 <= rating.score %}
+                                            <i class="fas fa-star" style="color: gold;"></i> <!-- Filled star -->
+                                        {% else %}
+                                            <i class="far fa-star" style="color: lightgray;"></i> <!-- Empty star -->
+                                        {% endif %}
+                                    {% endfor %}
+                                    <br>
+                                {% endfor %}
+                            {% else %}
+                                <form method="POST" action="{% url 'submit_rating' task.id %}">
+                                    {% csrf_token %}
+                                    <select name="score" required>
+                                        <option value="">Rate</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                    
+                                    <button type="submit">Submit Rating</button>
+                                </form>
+                            {% endif %}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    
+                   
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="no-tasks">No tasks assigned.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <p class="no-tasks">No tasks assigned.</p>
+{% endif %}
+
+
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#tasksTable').DataTable({
+            "paging": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "lengthMenu": [5, 10, 25, 50],
+            "language": {
+                "lengthMenu": "Show _MENU_ entries",
+                "zeroRecords": "No tasks found",
+                "info": "Showing page _PAGE_ of _PAGES_",
+                "infoEmpty": "No entries available",
+                "infoFiltered": "(filtered from _MAX_ total entries)"
+            }
+        });
+    });
+</script>
+
+{% endblock %}
