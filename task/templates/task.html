@@ -4,22 +4,6 @@
 {% block content %}
 <style>
    
-    .date-filter-form {
-        display: flex;
-        align-items: center;
-    }
-
-    .date-filter-form .form-label {
-        margin-right: 10px;
-    }
-
-    .date-filter-form .form-control {
-        margin-right: 10px;
-    }
-
-    .date-filter-form .btn {
-        margin-left: 5px;
-    }
 </style>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -30,26 +14,19 @@
             {% include 'navbar.html' %}
         </div>
 
-        <div class="col-lg-10 col-md-9 col-sm-8">
+        <div class="col-lg-10 col-md-9 col-sm-12"> <!-- Adjusted for smaller screens -->
             <div class="tab-content mt-4">
                 <div class="tab-pane" id="task-assign">
-                    
 
-                    {% if messages %}
-                        <div class="alert alert-success" role="alert">
-                            {% for message in messages %}
-                                {{ message }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-
-                    <div class="card mt-4" style="margin-left: 200px;">
+                    <div class="card mt-4">
                         <div class="card-body">
                             <h5 class="card-title">Search Employee by ID</h5>
                             <form method="GET" action="{% url 'task' %}" class="d-flex mb-4">
-                                <input class="form-control me-2" type="search" name="emp_id" placeholder="Enter Employee ID" aria-label="Search" required>
+                                <input class="form-control me-2" type="search" name="emp_id" placeholder="Enter Employee ID" aria-label="Search by ID">
+                                <input class="form-control me-2" type="search" name="emp_name" placeholder="Enter Employee Name" aria-label="Search by Name">
                                 <button class="btn btn-primary" type="submit">Search</button>
                             </form>
+                            
                             <div id="search-results">
                                 {% if employee %}
                                 <div class="table-responsive">
@@ -104,35 +81,34 @@
                             <form method="POST" action="{% url 'task' %}" id="assignTaskForm" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <input type="hidden" id="employeeId" name="employee_id">
-                            
+                                
                                 <!-- Task Title -->
                                 <div class="mb-3">
                                     <label for="taskTitle" class="form-label">Task Title</label>
                                     <input type="text" class="form-control" id="taskTitle" name="task_title" required>
                                 </div>
-                            
+                                
                                 <!-- Task Description -->
                                 <div class="mb-3">
                                     <label for="taskDescription" class="form-label">Task Description</label>
                                     <textarea class="form-control" id="taskDescription" name="task_description" rows="3" required></textarea>
                                 </div>
-                            
+                                
                                 <!-- Complete Before -->
                                 <div class="mb-3">
                                     <label for="completeBefore" class="form-label">Complete Before</label>
                                     <input type="date" class="form-control" id="completeBefore" name="complete_before" required>
                                 </div>
-                            
+                                
                                 <!-- Attach Document -->
                                 <div class="mb-3">
                                     <label for="document" class="form-label">Attach Document</label>
                                     <input type="file" class="form-control" id="document" name="document">
                                 </div>
-                            
+                                
                                 <!-- Submit Button -->
                                 <button type="submit" class="btn btn-primary">Submit Task</button>
                             </form>
-                            
                         </div>
                     </div>
                 </div>

@@ -234,7 +234,6 @@ def SalarySleep(request):
     
 
     employee_data = userInfo(request.session['My_Id'])
-    print(employee_data)
     context={
         'employee_data':employee_data,
     }

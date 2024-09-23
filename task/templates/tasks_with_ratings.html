@@ -20,58 +20,78 @@
         margin-left: 5px;
     }
 </style>
+
 <div>
     {% include 'navbar.html' %}
 </div>
-<div class="col-lg-12">
-    <div class="section-container">
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5 class="card-title text-center">Tasks Ratings for {{ username }}</h5>
-                <h6 class="text-center">Total Average Rating: {{ average_rating|floatformat:1 }}</h6>
-                
-                <table id="tasksTable" class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Task Title</th>
-                            <th>Task Description</th>
-                            <th>Assigned At</th>
-                            <th>Ratings</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for task in tasks %}
-                            <tr>
-                                <td>{{ task.task_title }}</td>
-                                <td>{{ task.task_description }}</td>
-                                <td>{{ task.assigned_at|date:"Y-m-d" }}</td>
-                                <td>
-                                    {% if task.ratings_list.count > 0 %}
-                                        <div class="rating-stars">
-                                            {% for rating in task.ratings_list %}
-                                                {% for i in "12345"|make_list %}
-                                                    <span class="star" style="cursor: default;">
-                                                        {% if i|add:0 <= rating.score %}
-                                                            <i class="fas fa-star" style="color: gold;"></i>
-                                                        {% else %}
-                                                            <i class="far fa-star" style="color: lightgoldenrodyellow;"></i>
-                                                        {% endif %}
-                                                    </span>
-                                                {% endfor %}
-                                            {% endfor %}
-                                        </div>
-                                    {% else %}
-                                        No ratings yet.
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center">No completed tasks found.</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="section-container">
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">Tasks Ratings for {{ username }}</h5>
+                        <h6 class="text-center">Total Average Rating: {{ average_rating|floatformat:1 }}</h6>
+                        
+                        <div class="table-responsive">
+                            <table id="tasksTable" class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Task Title</th>
+                                        <th>Task Description</th>
+                                        <th>Assigned At</th>
+                                        <th>Assigned By</th>
+                                        <th>Ratings</th>
+                                        <th>Comment</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for task in tasks %}
+                                        <tr>
+                                            <td>{{ task.task_title }}</td>
+                                            <td>{{ task.task_description }}</td>
+                                            <td>{{ task.assigned_at|date:"Y-m-d" }}</td>
+                                            <td>{{ task.assigned_by.emp_name }}</td>
+                                            <td>
+                                                {% if task.ratings_list.count > 0 %}
+                                                    <div class="rating-stars">
+                                                        {% for rating in task.ratings_list %}
+                                                            {% for i in "12345"|make_list %}
+                                                                <span class="star" style="cursor: default;">
+                                                                    {% if i|add:0 <= rating.score %}
+                                                                        <i class="fas fa-star" style="color: gold;"></i>
+                                                                    {% else %}
+                                                                        <i class="far fa-star" style="color: lightgoldenrodyellow;"></i>
+                                                                    {% endif %}
+                                                                </span>
+                                                            {% endfor %}
+                                                        {% endfor %}
+                                                    </div>
+                                                {% else %}
+                                                    No ratings yet.
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if task.ratings_list.count > 0 %}
+                                                    {% for rating in task.ratings_list %}
+                                                        <p>{{ rating.comment|default:"No comment provided." }}</p>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    No comment.
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="6" class="text-center">No completed tasks found.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

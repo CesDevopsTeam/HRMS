@@ -4,74 +4,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <style>
-    .scroll-container {
-        overflow-y: auto;
-        max-height: 400px; /* Adjust the height as needed */
-    }
-    .task-container {
-        background-color: #f9f9f9;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        padding: 10px;
-        margin-bottom: 10px;
-    }
-    .list-group-item {
-        border: none;
-        background-color: #fff;
-    }
-    .btn-custom {
-        width: 100px;
-    }
-    /* Flip card styles */
-    .flip-card {
-        background-color: transparent;
-        width: 490px;
-        height: 314px;
-        perspective: 1000px;
-        font-family: sans-serif;
-    
-    }
-    .flip-card-inner {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        text-align: center;
-        transition: transform 0.8s;
-        transform-style: preserve-3d;
-    }
-    .flip-card:hover .flip-card-inner {
-        transform: rotateY(180deg);
-    }
-    .flip-card-front, .flip-card-back {
-        box-shadow: 0 8px 14px 0 rgba(0,0,0,0.2);
-        position: absolute;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center; /* Center align items */
-        width: 100%;
-        height: 100%;
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-        border: 1px solid rgb(59, 18, 2);
-        border-radius: 1rem;
-    }
-    .flip-card-front {
-        background: url("{% static 'img/flip1.jpg' %}") no-repeat center center; /* Front image */
-        background-size: cover; /* Ensure the image covers the front */
-        color: white; /* Optional: Change text color for better visibility */
-        padding: 20px; /* Optional padding for better spacing */
-    }
-    .flip-card-back {
-        background: url("{% static 'img/task_page.avif' %}") no-repeat center center; /* Back image */
-        background-size: cover; /* Ensure the image covers the back */
-        transform: rotateY(180deg);
-    }
-    /* Remove hover effects for the back side */
-    .flip-card:hover .flip-card-back {
-        background: url("{% static 'img/task_page.avif' %}") no-repeat center center; /* Keep the image */
-        background-size: cover; /* Ensure it stays covered */
-    }
+   
 </style>
 
 <div class="col-lg-12">
@@ -170,7 +103,6 @@
                     </ul>
                 </div>
                 {% empty %}
-                <li class="list-group-item">No completed tasks.</li>
                 {% endfor %}
             </div>
         </div>
