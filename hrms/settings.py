@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'Attendance',
     'notifications',
     'task',
+    'kpi',
 ]
 
 MIDDLEWARE = [

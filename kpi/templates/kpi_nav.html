@@ -1,0 +1,80 @@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Right Sidebar Custom for KPI Navigation */
+        #kpiSidebar {
+            position: fixed;
+            right: 0;
+            width: 80px;
+            transition: width 0.3s;
+            z-index: 9999;
+        }
+
+        #kpiSidebar:hover {
+            width: 150px;
+        }
+
+        #kpiSidebar .kpi-nav-link {
+            padding: 15px;
+            transition: 0.3s;
+            color: #156303b5;
+        }
+
+        #kpiSidebar .kpi-nav-link:hover {
+            background-color: #04f30438;
+            color: #ff0505;
+        }
+
+        #kpiSidebar i {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        #kpiSidebar .kpi-nav-link span {
+            display: none;
+            margin-left: 10px;
+        }
+
+        #kpiSidebar:hover .kpi-nav-link span {
+            display: inline-block;
+        }
+
+        /* Main content custom for KPI */
+        .kpi-content {
+            margin-right: 80px;
+            transition: margin-right 0.3s;
+        }
+
+        #kpiSidebar:hover ~ .kpi-content {
+            margin-right: 250px;
+        }
+
+        @media (max-width: 768px) {
+            #kpiSidebar {
+                width: 60px;
+            }
+
+            #kpiSidebar:hover {
+                width: 180px;
+            }
+
+            .kpi-content {
+                margin-right: 60px;
+            }
+
+            #kpiSidebar:hover ~ .kpi-content {
+                margin-right: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Right Sidebar for KPI -->
+    <div id="kpiSidebar" class="d-flex flex-column">
+        <a href="/KPI/" class="kpi-nav-link"><i class="fas fa-chart-line"></i><span>KPI</span></a>
+        <a href="/KPI/KRA/" class="kpi-nav-link"><i class="fas fa-tasks"></i><span>KRA</span></a>
+        <a href="#" class="kpi-nav-link"><i class="fas fa-cogs"></i><span>Set KPI</span></a>
+        <a href="#" class="kpi-nav-link"><i class="fas fa-check"></i><span>Verify</span></a>
+        <a href="#" class="kpi-nav-link"><i class="fas fa-star"></i><span>Ratings</span></a>
+    </div>
+

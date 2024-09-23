@@ -24,6 +24,7 @@ from django.views.static import serve
 urlpatterns = [
     path('devops/', admin.site.urls),
     path('', include('main.urls')),
+    path('KPI/', include('kpi.urls')),
     path('Attendance/', include('Attendance.urls')),
     path('Notifications/', include('notifications.urls')),
     path('Main/', include('main.urls')),

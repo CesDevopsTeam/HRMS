@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+{% include 'kpi_nav.html' %}
+<style>
+    .table th,
+    .table td {
+        vertical-align: middle;
+        transition: background-color 0.3s;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+
+    /* CSS for Right-Side Modal */
+    .modal-dialog-end {
+        position: absolute;
+        right: 0;
+        margin: 0;
+        height: 100%;
+        width: 50%;
+    }
+
+    .modal-content {
+        border-radius: 0;
+        height: 100%;
+        background-color: #f8f9fa;
+        /* Light background for the modal */
+        border: 1px solid #28a745;
+        /* Green border */
+    }
+
+    .btn-custom {
+        background-color: #28a745;
+        color: white;
+        transition: background-color 0.3s;
+    }
+
+    .btn-custom:hover {
+        background-color: #218838;
+    }
+</style>
+
+<div class="container p-4 my-3"
+    style="background-color: rgba(255, 255, 255, 0.9); border: 1px solid #28a74684; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">
+    <h5 class="text-center card-title" style="color: #28a745;">Set Employee KRA</h5>
+    <table class="table text-center my-3 table-bordered table-hover" id="datatables"
+        style="border-radius: 10px; overflow: hidden;">
+        <thead class="thead-light">
+            <tr>
+                <th>#</th>
+                <th>Designation</th>
+                <th>KRA</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in KRA_data %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.Role.role_name }}</td>
+                <td>
+                    <div class="card-title">
+                        <button class="btn btn-danger" data-toggle="modal"
+                            data-target="#rightSideModal{{ item.Role.pk }}">Set / Preview</button>
+                        {% if item.KRA_Model %}
+                        <span class="text-success" style="font-size: 20px;"><b>*</b></span>
+                        {% else %}
+                        <span class="text-danger" style="font-size: 20px;"><b>*</b></span>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+
+            <!-- Right-Side Modal -->
+            <div class="modal fade" id="rightSideModal{{ item.Role.pk }}" tabindex="-1"
+                aria-labelledby="rightSideModalLabel{{ item.Role.pk }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-end modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="rightSideModalLabel{{ item.Role.pk }}">KRA for {{item.Role.role_name }}</h1>
+                        </div>
+                        <div class="modal-body" style="width: 100%; max-height: 80vh; overflow-x: auto;">
+                            <div class="d-flex" style="width: max-content;">
+
+
+                                
+                                <div class="col" style="display: inline-block; width: 600px; margin: auto; padding: 20px; border: 2px solid gold; border-radius: 10px; background-color: rgba(255, 255, 255, 0.1);">
+                                    <h2 style="text-align: center; color: gold;">Create KRA</h2>
+                                    <form action="" method="post" id="form_id{{item.Role.pk}}">
+                                        {% csrf_token %}
+                                        <div style="margin-bottom: 15px;">
+                                            <label for="title" style="display: block; margin-bottom: 5px;">Title:</label>
+                                            <input value="" type="text" id="title" name="title" required
+                                                style="width: 100%; padding: 10px; border: 1px solid gold; border-radius: 5px; background-color: white; color: black;">
+                                        </div>
+                                        <div style="margin-bottom: 15px;">
+                                            <label for="role" style="display: block; margin-bottom: 5px;">Role:</label>
+                                            <select id="role" name="role" required
+                                                style="width: 100%; padding: 10px; border: 1px solid gold; border-radius: 5px; background-color: white; color: black;">
+                                                <option value="{{ item.Role.role_name }}">{{ item.Role.role_name }}</option>
+                                            </select>
+                                        </div>
+                                        <div style="margin-bottom: 15px;">
+                                            <label for="description"
+                                                style="display: block; margin-bottom: 5px;">Description:</label>
+                                            <textarea id="description" name="description" rows="7
+                                                " style="width: 100%; padding: 10px; border: 1px solid gold; border-radius: 5px; background-color: white; color: black;"></textarea>
+                                        </div>
+                                        <div style="margin-bottom: 15px;">
+                                            <label for="kpi_value" style="display: block; margin-bottom: 5px;">KPI Priority:
+                                                (3 Means High)</label>
+                                            <select name="kpi_value" required class="form-control">
+                                                <option value="">Select</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                            </select>
+                                        </div>
+                                        <div style="text-align: center;">
+                                            <button type="submit"
+                                                style="padding: 10px 20px; border: none; border-radius: 5px; background-color: gold; color: black; font-weight: bold; cursor: pointer;">Submit</button>
+                                        </div>
+                                    </form>
+                                </div>
+    
+                                {% for item in All_KRA_Model.0 %}
+                                <div class="col" style="min-width: 600px; margin: 0 10px; padding: 20px; border: 2px solid gold; border-radius: 10px; background-color: rgba(255, 255, 255, 0.1);">
+                                    <h2 style="text-align: center; color: gold;">{{ item.role_name }}</h2>
+                                    <form action="" method="post" id="form_id{{item.Role.pk}}">
+                                        {% csrf_token %}
+                                        <div style="margin-bottom: 15px;">
+                                            <label for="title" style="display: block; margin-bottom: 5px;">Title:</label>
+                                            <input value="" type="text" id="title" name="title" required
+                                                style="width: 100%; padding: 10px; border: 1px solid gold; border-radius: 5px; background-color: white; color: black;">
+                                        </div>
+                                        <div style="margin-bottom: 15px;">
+                                            <label for="description" style="display: block; margin-bottom: 5px;">Description:</label>
+                                            <textarea id="description" name="description" rows="7
+                                                " style="width: 100%; padding: 10px; border: 1px solid gold; border-radius: 5px; background-color: white; color: black;"></textarea>
+                                        </div>
+                                        <div style="margin-bottom: 15px;">
+                                            <label for="kpi_value" style="display: block; margin-bottom: 5px;">KPI Priority: (3 Means High)</label>
+                                            <select name="kpi_value" required class="form-control">
+                                                <option value="">Select</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                            </select>
+                                        </div>
+                                        <div style="text-align: center;">
+                                            <button type="submit"
+                                                style="padding: 10px 20px; border: none; border-radius: 5px; background-color: gold; color: black; font-weight: bold; cursor: pointer;">Submit</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="container text-center">
+                            <button class="btn btn-secondary"
+                                onclick="$('#rightSideModal{{ item.Role.pk }}').modal('hide');">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Bootstrap and jQuery JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}
