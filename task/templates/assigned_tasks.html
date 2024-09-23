@@ -9,100 +9,97 @@
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-
 <style>
     body {
-        background-image: url('/static/img/task_page.avif'); /* Replace with your actual image path */
-        background-size: cover; /* Cover the entire background */
-        background-position: center; /* Center the image */
-        background-repeat: no-repeat; /* Prevent repeating the image */
+        background-image: url('/static/img/task_page.avif');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
     }
     .filter-container {
-        margin-top: 20px;
-        margin-left: 400px;
+        margin: 20px auto; /* Center the filter container */
         display: flex;
-        width: 800px;
-        
+        flex-wrap: wrap; /* Allow wrapping */
         padding: 20px;
-        background-color: #f9f9f9; /* Light background for the form */
-        border-radius: 8px; /* Rounded corners */
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        max-width: 800px; /* Limit width */
     }
-    
+
     .form-group {
-        margin-bottom: 0; /* No margin at the bottom for horizontal layout */
+        flex: 1; /* Allow input fields to grow */
+        min-width: 250px; /* Minimum width for inputs */
+        margin-right: 10px; /* Spacing between fields */
     }
-    
-    .form-group input {
-        width: 250px; /* Set a fixed width for inputs */
-    }
-    
+
     button {
-        align-self: center; /* Center the button vertically */
+        align-self: center;
     }
+
     .rating-form {
-        background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
-        border-radius: 8px; /* Rounded corners */
-        padding: 20px; /* Padding for spacing */
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-        max-width: 400px; /* Limit width */
-        margin: 20px auto; /* Center the form */
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        max-width: 400px;
+        margin: 20px auto;
     }
 
     .rating-form h4 {
-        margin-bottom: 15px; /* Spacing below the title */
-        font-family: 'Arial', sans-serif; /* Font style */
-        color: #333; /* Darker text color */
+        margin-bottom: 15px;
+        font-family: 'Arial', sans-serif;
+        color: #333;
     }
 
-    .rating-form select,
-    .rating-form textarea,
-    .rating-form button {
-        width: 100%; /* Full width */
-        padding: 10px; /* Padding for inputs */
-        margin-bottom: 15px; /* Space between inputs */
-        border: 1px solid #ddd; /* Light border */
-        border-radius: 5px; /* Rounded corners */
-        font-size: 16px; /* Font size */
+    .star-rating {
+        direction: rtl;
+        font-size: 1.5rem;
+        cursor: pointer;
+        display: inline-block;
     }
 
-    .rating-form select:focus,
-    .rating-form textarea:focus,
-    .rating-form button:focus {
-        outline: none; /* Remove outline */
-        border-color: #1e90ff; /* Blue border on focus */
+    .star-rating input {
+        display: none;
     }
 
-    .rating-form button {
-        background-color: #1e90ff; /* Button color */
-        color: white; /* Text color */
-        border: none; /* No border */
-        cursor: pointer; /* Pointer cursor */
-        transition: background-color 0.3s; /* Transition for hover effect */
+    .star-rating label {
+        color: lightgray;
+        font-size: 2rem;
     }
 
-    .rating-form button:hover {
-        background-color: #007bff; /* Darker shade on hover */
+    .star-rating input:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+        color: gold;
     }
-    
-    
-    /* Your existing styles */
+
+    @media (max-width: 768px) {
+        .filter-container {
+            flex-direction: column; /* Stack fields vertically on small screens */
+            align-items: stretch; /* Stretch to full width */
+        }
+        
+        .form-group {
+            margin-right: 0; /* Remove right margin */
+            margin-bottom: 10px; /* Add space between fields */
+        }
+    }
 </style>
+
 <div>
     {% include 'navbar.html' %}
 </div>
 
-
-
 <!-- Date filter form -->
 <div class="filter-container">
     <form method="GET" class="mb-3 d-flex flex-wrap">
-        <div class="form-group me-3">
+        <div class="form-group">
             <label for="date">Select Date:</label>
             <input type="date" name="date" id="date" class="form-control" value="{{ selected_date }}">
         </div>
         
-        <div class="form-group me-3">
+        <div class="form-group">
             <label for="employee_name">Employee Name:</label>
             <input type="text" name="employee_name" id="employee_name" class="form-control" value="{{ employee_name }}" placeholder="Enter employee name">
         </div>
@@ -112,7 +109,7 @@
 </div>
 
 <div style="background-color: rgb(245, 247, 249);">
-{% if assigned_tasks %}
+    {% if assigned_tasks %}
     <div class="task-container" style="margin-top: 10px;">
         <table class="table table-striped" id="tasksTable">
             <thead>
@@ -124,10 +121,7 @@
                     <th>Assigned To</th>
                     <th>Document</th>
                     <th>Acknowledge status</th>
-                    
-
                     <th>Rate</th>
-                    
                 </tr>
             </thead>
             <tbody>
@@ -152,56 +146,72 @@
                             <span class="text-danger">Not Acknowledged</span>
                         {% endif %}
                     </td>
-                    
                     <td>
                         {% if task.is_completed %}
-                            {% if task.ratings_list.count > 0 %}
-                                {% for rating in task.ratings_list %}
-                                 
-                                    {% for i in "12345"|make_list %}
-                                        {% if i|add:0 <= rating.score %}
-                                            <i class="fas fa-star" style="color: gold;"></i> <!-- Filled star -->
-                                        {% else %}
-                                            <i class="far fa-star" style="color: lightgray;"></i> <!-- Empty star -->
-                                        {% endif %}
+                            {% if task.ratings_list %}
+                                <span id="stars_{{ task.id }}">
+                                    {% for rating in task.ratings_list %}
+                                        {% for i in "54321"|make_list %}
+                                            {% if i|add:0 <= rating.score %}
+                                                <i class="fas fa-star" style="color: gold;"></i>
+                                            {% else %}
+                                                <i class="far fa-star" style="color: lightgray;"></i>
+                                            {% endif %}
+                                        {% endfor %}
                                     {% endfor %}
-                                    <br>
-                                {% endfor %}
+                                </span>
                             {% else %}
-                                <form method="POST" action="{% url 'submit_rating' task.id %}">
-                                    {% csrf_token %}
-                                    <select name="score" required>
-                                        <option value="">Rate</option>
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                    </select>
-                                    
-                                    <button type="submit">Submit Rating</button>
-                                </form>
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ratingModal{{ task.id }}">Rate</button>
                             {% endif %}
                         {% else %}
                             N/A
                         {% endif %}
                     </td>
-                    
-                   
                 </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="no-tasks">No tasks assigned.</td>
-                </tr>
+                
+                <!-- Modal Structure -->
+                <div class="modal fade" id="ratingModal{{ task.id }}" tabindex="-1" role="dialog" aria-labelledby="ratingModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="ratingModalLabel">Rate Task</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="POST" action="{% url 'submit_rating' task.id %}">
+                                    {% csrf_token %}
+                                    <div class="star-rating">
+                                        <input type="radio" name="score" id="rate5_{{ task.id }}" value="5">
+                                        <label for="rate5_{{ task.id }}"><i class="fas fa-star"></i></label>
+                                        <input type="radio" name="score" id="rate4_{{ task.id }}" value="4">
+                                        <label for="rate4_{{ task.id }}"><i class="fas fa-star"></i></label>
+                                        <input type="radio" name="score" id="rate3_{{ task.id }}" value="3">
+                                        <label for="rate3_{{ task.id }}"><i class="fas fa-star"></i></label>
+                                        <input type="radio" name="score" id="rate2_{{ task.id }}" value="2">
+                                        <label for="rate2_{{ task.id }}"><i class="fas fa-star"></i></label>
+                                        <input type="radio" name="score" id="rate1_{{ task.id }}" value="1">
+                                        <label for="rate1_{{ task.id }}"><i class="fas fa-star"></i></label>
+                                    </div>
+                                    <div class="form-group mt-3">
+                                        <label for="comment">Comment:</label>
+                                        <textarea name="comment" id="comment" class="form-control" rows="3" placeholder="Add your comment here..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm mt-2">Submit Rating</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 {% endfor %}
             </tbody>
         </table>
     </div>
-{% else %}
+    {% else %}
     <p class="no-tasks">No tasks assigned.</p>
-{% endif %}
-
-
+    {% endif %}
 </div>
 
 <script>
@@ -212,15 +222,16 @@
             "ordering": true,
             "info": true,
             "lengthMenu": [5, 10, 25, 50],
+            "order": [[1, 'desc']],
             "language": {
                 "lengthMenu": "Show _MENU_ entries",
                 "zeroRecords": "No tasks found",
-                "info": "Showing page _PAGE_ of _PAGES_",
+                "info": "Showing _START_ to _END_ of _TOTAL_ entries",
                 "infoEmpty": "No entries available",
-                "infoFiltered": "(filtered from _MAX_ total entries)"
+                "infoFiltered": "(filtered from _MAX_ total entries)",
+                "search": "Search:"
             }
         });
     });
 </script>
-
 {% endblock %}

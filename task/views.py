@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from Attendance.models import EmployeePersonalInfo
 from django.shortcuts import redirect, get_object_or_404
+
+from main.utils import userInfo
 # Example import in views.py or admin.py
 from .models import Task
 from django.contrib.auth.decorators import login_required
@@ -13,6 +15,8 @@ from .models import Task,Rating
 from Attendance.models import EmployeePersonalInfo
 from django.utils.dateparse import parse_date
 from datetime import date
+from django.contrib import messages  # Import the messages module
+
 def task(request):
     if 'My_Id' not in request.session:
         return redirect('/logout/')
@@ -25,10 +29,22 @@ def task(request):
     # Handle GET request
     if request.method == 'GET':
         emp_id = request.GET.get('emp_id', None)
+        emp_name = request.GET.get('emp_name', None)  # Get employee name from the search input
+
         if emp_id:
             searched = True
             try:
                 employee = EmployeePersonalInfo.objects.get(emp_id=emp_id)
+                username = employee.emp_name
+                tasks = Task.objects.filter(employee=employee)
+            except EmployeePersonalInfo.DoesNotExist:
+                employee = None
+
+        # Search by employee name
+        if emp_name:
+            searched = True
+            try:
+                employee = EmployeePersonalInfo.objects.get(emp_name__icontains=emp_name)  # Search by name
                 username = employee.emp_name
                 tasks = Task.objects.filter(employee=employee)
             except EmployeePersonalInfo.DoesNotExist:
@@ -67,9 +83,11 @@ def task(request):
                 document=document
             )
 
+            # Add success message
+            messages.success(request, 'Task assigned successfully!')
             return redirect('assigned_tasks')  # Redirect to the assigned tasks page
         except EmployeePersonalInfo.DoesNotExist:
-            pass
+            messages.error(request, 'Employee not found.')
 
     # Organize tasks by date for display
     if employee:
@@ -92,7 +110,11 @@ def task(request):
 
     average_rating = total_score / count if count > 0 else 0
 
+    # Retrieve employee data
+    employee_data = userInfo(request.session['My_Id'])
+
     return render(request, 'task.html', {
+        'employee_data': employee_data,  # Pass employee data to the template
         'employee': employee,
         'searched': searched,
         'username': username,
@@ -132,8 +154,12 @@ def daily_task_view(request):
                 count += task.ratings.count()
 
         average_rating = total_score / count if count > 0 else 0
-
+        
+        employee_data = userInfo(request.session['My_Id'])
+        show_filter=True
         return render(request, 'daily_task.html', {
+            'show_filter':show_filter,
+            'employee_data':employee_data,
             'tasks': tasks,
             'username': username,
             'date_filter': date_filter,
@@ -143,18 +169,24 @@ def daily_task_view(request):
         return redirect('/logout/')
 
     
+   
 def mark_task_completed(request, task_id):
     if request.method == 'POST':
         try:
             task = Task.objects.get(id=task_id)
             task.is_completed = True
             task.save()
+            messages.success(request, 'Task Completed  successfully!')
             return redirect('daily_task')
         except Task.DoesNotExist:
             return redirect('daily_task')
-
+        
 def task_assign_view(request):
-    return render(request, 'task_assign.html')
+    # Retrieve employee data
+    emp_id = request.session.get('My_Id')
+    employee_data = userInfo(emp_id)  # Assuming you have this function to fetch employee data
+    return render(request, 'task_assign.html', {'employee_data': employee_data})
+
 
 def assign_task_view(request):
     if request.method == 'POST':
@@ -163,10 +195,14 @@ def assign_task_view(request):
         try:
             employee = EmployeePersonalInfo.objects.get(emp_id=emp_id)
             Task.objects.create(employee=employee, task_description=task_description)
+            messages.success(request, 'Task assigned successfully!')
             return redirect('task_assign')
         except EmployeePersonalInfo.DoesNotExist:
+            messages.error(request, 'Employee does not exist.')
             return redirect('task_assign')
+
     return render(request, 'assign_task.html')
+
 
 def completed_tasks_view(request):
     emp_id = request.session.get('My_Id')
@@ -179,24 +215,24 @@ def completed_tasks_view(request):
 
         # Fetch associated ratings for each completed task
         for task in completed_tasks:
-            task.ratings_list = task.ratings.all()  # This line is correct
+            task.ratings_list = task.ratings.all()
 
         return render(request, 'completed_tasks.html', {'tasks': completed_tasks, 'username': employee.emp_name})
     except EmployeePersonalInfo.DoesNotExist:
         return redirect('/logout/')
+ 
 
-        
 def acknowledge_task_view(request, task_id):
     if request.method == 'POST':
         task = get_object_or_404(Task, id=task_id)
         if not task.is_acknowledged:
             task.is_acknowledged = True
             task.save()
+            messages.success(request, 'Task acknowledged successfully!')
     return redirect('daily_task')
 
 def navbar(request):
     return render(request, 'navbar.html')
-
 
 
 def overdue_tasks_view(request):
@@ -224,17 +260,20 @@ def overdue_tasks_view(request):
                 count += task.ratings.count()
 
         average_rating = total_score / count if count > 0 else 0
-
+        
+        # Retrieve employee data
+        employee_data = userInfo(emp_id)
+        
         return render(request, 'overdue_tasks.html', {
+            'employee_data': employee_data,
             'overdue_tasks': overdue_tasks,
             'username': username,
-            'average_rating': average_rating  # Add average rating to context
+            'average_rating': average_rating
         })
     except EmployeePersonalInfo.DoesNotExist:
         return redirect('/logout/')
 
-    
-    
+
 def assigned_tasks_view(request):
     emp_id = request.session.get('My_Id')
 
@@ -250,23 +289,22 @@ def assigned_tasks_view(request):
     current_date = timezone.now().date()
 
     # Get the selected date and employee name from request
-    selected_date = request.GET.get('date', str(current_date))  # Ensure date is in string format
+    selected_date = request.GET.get('date', str(current_date))
     employee_name = request.GET.get('employee_name', '')
 
     # Validate selected_date to avoid empty string
     if not selected_date:
-        selected_date = str(current_date)  # Set to current date if empty
+        selected_date = str(current_date)
 
     # Filter tasks assigned on the selected date and optionally by employee name
     assigned_tasks = Task.objects.filter(assigned_by=employee, assigned_at__date=selected_date)
 
-    # If employee_name is provided, further filter tasks
     if employee_name:
         assigned_tasks = assigned_tasks.filter(employee__emp_name__icontains=employee_name)
 
     # Add ratings to each task
     for task in assigned_tasks:
-        task.ratings_list = task.ratings.all()  # Get ratings for each task
+        task.ratings_list = task.ratings.all()
 
     # Calculate average rating for completed tasks
     total_score = 0
@@ -280,16 +318,21 @@ def assigned_tasks_view(request):
 
     average_rating = total_score / count if count > 0 else 0
 
+    # Retrieve employee data
+    employee_data = userInfo(emp_id)
+
     context = {
+        'employee_data': employee_data,
         'employee': employee,
         'assigned_tasks': assigned_tasks,
         'current_date': current_date,
         'selected_date': selected_date,
         'employee_name': employee_name,
-        'average_rating': average_rating  # Add average rating to context
+        'average_rating': average_rating
     }
 
     return render(request, 'assigned_tasks.html', context)
+
 
 
 
@@ -321,7 +364,6 @@ def submit_rating(request, task_id):
         )
 
         return redirect('assigned_tasks')  # Redirect back to assigned tasks view
-    
 
 def tasks_with_ratings_view(request):
     emp_id = request.session.get('My_Id')
@@ -344,10 +386,14 @@ def tasks_with_ratings_view(request):
 
         average_rating = total_score / count if count > 0 else 0
 
+        # Retrieve employee data
+        employee_data = userInfo(emp_id)
+
         return render(request, 'tasks_with_ratings.html', {
             'tasks': completed_tasks,
             'username': employee.emp_name,
-            'average_rating': average_rating
+            'average_rating': average_rating,
+            'employee_data': employee_data  # Pass employee data to the template
         })
     except EmployeePersonalInfo.DoesNotExist:
         return redirect('/logout/')

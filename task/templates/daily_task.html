@@ -4,7 +4,6 @@
 {% block content %}
 <style>
    
-    
     .welcome-text {
         margin-right: 20px; /* Space between welcome text and filter form */
     }
@@ -12,18 +11,21 @@
     .date-filter-form {
         display: flex;
         align-items: center; /* Align form items vertically center */
+        flex-wrap: wrap; /* Allow wrapping for smaller screens */
+    }
+    
+    .date-filter-form .form-label,
+    .date-filter-form .form-control,
+    .date-filter-form .btn {
+        margin-right: 10px; /* Space between elements */
     }
     
     .date-filter-form .form-label {
-        margin-right: 10px; /* Space between label and input */
+        flex: 1; /* Allow label to grow */
     }
     
     .date-filter-form .form-control {
-        margin-right: 10px; /* Space between input and button */
-    }
-    
-    .date-filter-form .btn {
-        margin-left: 5px; /* Space on the left of the button */
+        flex: 2; /* Allow input to grow */
     }
     
     .btn-info {
@@ -38,7 +40,7 @@
     
     .task-container {
         display: inline-block;
-        width: 100%;
+        width: calc(100% - 20px); /* Adjust for margin */
         margin-bottom: 10px;
         vertical-align: top;
         border: 1px solid #ddd;
@@ -59,13 +61,10 @@
     
     .section-container {
         flex: 1;
-        margin: 0 10px;
-        height: 500px;
+        height: 800px;
         overflow-y: auto; /* Allow vertical scrolling within the section */
-        overflow-x: hidden; /* Prevent horizontal scrolling */
     }
     
-    /* Optional: If you want to hide the scrollbar visually but still allow scrolling */
     .section-container::-webkit-scrollbar {
         display: none; /* Hide scrollbar in WebKit browsers */
     }
@@ -118,7 +117,8 @@
         transition: 0.3s;
     }
     
-    .btn2::before {
+    .btn2::before,
+    .btn2::after {
         content: '';
         position: absolute;
         top: -2px;
@@ -127,19 +127,10 @@
         height: calc(100% - -2px);
         background-color: #212121;
         transition: 0.3s ease-out;
-        transform: scaleY(1);
     }
     
     .btn2::after {
-        content: '';
-        position: absolute;
-        top: -2px;
-        left: -2px;
-        width: calc(100% + 4px);
         height: calc(100% - 50px);
-        background-color: #212121;
-        transition: 0.3s ease-out;
-        transform: scaleY(1);
     }
     
     .btn2:hover::before {
@@ -169,7 +160,8 @@
     
     .flip-card {
         background-color: transparent;
-        width: 490px;
+        width: 100%; /* Make it responsive */
+        max-width: 490px; /* Set a max width */
         height: 314px;
         perspective: 1000px;
         font-family: sans-serif;
@@ -198,7 +190,6 @@
         align-items: center; /* Center align items */
         width: 100%;
         height: 100%;
-        -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
         border: 1px solid rgb(59, 18, 2);
         border-radius: 1rem;
@@ -212,15 +203,39 @@
     }
     
     .flip-card-back {
-        background: url("{% static 'img/task_page.avif' %}") no-repeat center center; /* Back image */
         background-size: cover; /* Ensure the image covers the back */
         transform: rotateY(180deg);
     }
     
     /* Remove hover effects for the back side */
     .flip-card:hover .flip-card-back {
-        background: url("{% static 'img/task_page.avif' %}") no-repeat center center; /* Keep the image */
         background-size: cover; /* Ensure it stays covered */
+    }
+    
+    /* Media Queries for Responsive Design */
+    @media (max-width: 768px) {
+        .date-filter-form {
+            flex-direction: column; /* Stack elements vertically */
+        }
+    
+        .date-filter-form .form-label,
+        .date-filter-form .form-control,
+        .date-filter-form .btn {
+            margin-right: 0; /* Reset margin */
+            margin-bottom: 10px; /* Add space below elements */
+        }
+    
+        .horizontal-layout {
+            flex-direction: column; /* Stack items vertically */
+        }
+    
+        .section-container {
+            height: auto; /* Allow height to adjust based on content */
+        }
+    
+        .flip-card {
+            width: 100%; /* Full width on smaller screens */
+        }
     }
     
 </style>
@@ -230,17 +245,11 @@
 </div>
 
 
-<div style="background-color: #fcf9f9; width: 300px; padding: 10px; border-radius: 5px; margin-left:570px; margin-top:10px;">
-    <form method="GET" action="{% url 'daily_task' %}" class="date-filter-form" style="display: flex; flex-direction: column; align-items: center;">
-        <input type="date" id="dateFilter" name="date_filter" class="form-control" value="{{ date_filter }}" style="margin-bottom: 10px;">
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Filter</button>
-    </form>
-</div>
 
 
 
-<div class="container-fluid" style="height: 100vh;" >
-    <div class="row horizontal-layout">
+<div class="container-fluid" >
+    <div class="row">
         <!-- Main Content Area -->
         <div class="col-lg-12">
             <div class="horizontal-layout">
@@ -292,19 +301,13 @@
                                             <th>Complete Before</th>
                                             <td>: {{ task.complete_before|date:"Y-m-d" }}</td>
                                         </tr>
-                                        <tr>
-                                            <th>Assigned By</th>
-                                            <td>: {% if task.assigned_by %} {{ task.assigned_by.emp_name }} {% else %} N/A {% endif %}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Status</th>
-                                            <td>: {% if task.is_acknowledged %} Acknowledged {% else %} Not Acknowledged {% endif %}</td>
-                                        </tr>
+                                        
+                                       
                                         <tr>
                                             <th>Document</th>
                                             <td>
                                                 {% if task.document %}
-                                                    <a href="{{ task.document.url }}" target="_blank">View Document</a>
+                                                    <a href="{{ task.document.url }}" target="_blank">View</a>
                                                 {% else %}
                                                     N/A
                                                 {% endif %}
@@ -312,12 +315,13 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                                <div class="row mt-3">
+                                <div class="row my-3">
                                     <div class="col">
                                         <button type="button" class="btn btn-primary form-control" data-bs-toggle="modal" data-bs-target="#rightSideModal"
                                             data-task-id="{{ task.id }}"
                                             data-task-title="{{ task.task_title }}" 
                                             data-task-description="{{ task.task_description }}"
+                                            data-task-document="{{ task.task_document }}"
                                             data-assigned-at="{{ task.assigned_at|date:'Y-m-d' }}"
                                             data-complete-before="{{ task.complete_before|date:'Y-m-d' }}">
                                              Details
@@ -349,6 +353,63 @@
             </ul>
         </div>
     {% endif %}
+
+
+
+
+     <!-- Right-Side Modal -->
+<div class="modal fade" id="rightSideModal" tabindex="-1" aria-labelledby="rightSideModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-end modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="rightSideModalLabel">Task Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body" style="border:2px solid #03ce32;background-color: rgba(0, 255, 17, 0.075);">
+            
+          <table class="table table-bordered table-striped">
+            
+            <tbody>
+              <tr>
+                <th>User</th>
+                <td id="modal-username">{{ username }}</td>
+              </tr>
+              <tr>
+                <th>Task Title</th>
+                <td id="task-title"></td> <!-- Added ID for task title -->
+            </tr>
+              <tr>
+                <th>Task Description</th>
+                <td id="task-description"></td>
+              </tr>
+              <tr>
+                <th>Assigned At</th>
+                <td id="assigned-at"></td>
+              </tr>
+              <tr>
+                <th>Complete Before</th>
+                <td id="complete-before"></td>
+              </tr>
+              <tr></tr>
+                <th>view Document</th>
+                <td id="task_document"></td>
+              </tr>
+                
+            </tr>
+             
+            </tbody>
+          </table>
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
 {% endfor %}
 
                             </div>
@@ -409,12 +470,16 @@
                 <th>Complete Before</th>
                 <td id="complete-before"></td>
               </tr>
-              
+              <tr></tr>
+                <th>view Document</th>
+                <td id="task_document"></td>
+              </tr>
                 
             </tr>
              
             </tbody>
           </table>
+          
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -425,26 +490,63 @@
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var myModal = document.getElementById('rightSideModal')
+        var myModal = document.getElementById('rightSideModal');
         myModal.addEventListener('show.bs.modal', function (event) {
             // Button that triggered the modal
-            var button = event.relatedTarget
-
+            var button = event.relatedTarget;
+    
             // Extract info from data-* attributes
-            var taskDescription = button.getAttribute('data-task-description')
-            var assignedAt = button.getAttribute('data-assigned-at')
-            var completeBefore = button.getAttribute('data-complete-before')
-            var taskTitle = button.getAttribute('data-task-title') // Get the task title
-
+            var taskDescription = button.getAttribute('data-task-description');
+            var assignedAt = button.getAttribute('data-assigned-at');
+            var completeBefore = button.getAttribute('data-complete-before');
+            var taskTitle = button.getAttribute('data-task-title');
+            var taskDocument = button.getAttribute('data-task-document'); // Get the task document URL
+    
             // Update the modal's content.
-            var modalBody = myModal.querySelector('.modal-body')
+            var modalBody = myModal.querySelector('.modal-body');
+    
+            modalBody.querySelector('#task-description').textContent = taskDescription;
+            modalBody.querySelector('#assigned-at').textContent = assignedAt;
+            modalBody.querySelector('#complete-before').textContent = completeBefore;
+            modalBody.querySelector('#task-title').textContent = taskTitle;
+    
+            // Set the task document link
+            var taskDocumentCell = modalBody.querySelector('#task_document');
+            if (taskDocument !== 'N/A') {
+                taskDocumentCell.innerHTML = `<a href="${taskDocument}" target="_blank">View Document</a>`;
+            } else {
+                taskDocumentCell.textContent = 'N/A';
+            }
+        });
+    });
+    
+</script>
+<script>
+    // Select all flip cards
+    const flipCards = document.querySelectorAll('.flip-card');
 
-            modalBody.querySelector('#task-description').textContent = taskDescription
-            modalBody.querySelector('#assigned-at').textContent = assignedAt
-            modalBody.querySelector('#complete-before').textContent = completeBefore
-            modalBody.querySelector('#task-title').textContent = taskTitle // Set the task title
-        })
-    })
+    let flippedCard = null;  // Keep track of the currently flipped card
+
+    flipCards.forEach((card) => {
+        card.addEventListener('click', () => {
+            const innerCard = card.querySelector('.flip-card-inner');
+
+            // If there's already a flipped card, unflip it
+            if (flippedCard && flippedCard !== innerCard) {
+                flippedCard.style.transform = 'rotateY(0deg)';  // Unflip the previous card
+            }
+
+            // Flip the current card
+            if (innerCard.style.transform === 'rotateY(180deg)') {
+                // If the card is already flipped, unflip it
+                innerCard.style.transform = 'rotateY(0deg)';
+                flippedCard = null;  // Reset the flipped card tracker
+            } else {
+                innerCard.style.transform = 'rotateY(180deg)';
+                flippedCard = innerCard;  // Track this as the flipped card
+            }
+        });
+    });
 </script>
 
   
